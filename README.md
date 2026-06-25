@@ -1,49 +1,50 @@
-# المراقب الذاتي للشبكة (The Network's Self-Awareness)
+# المراقب الذاتي للشبكة (v4 — Creative Open Brain)
 
-نظام يفصل **العقل** (وكيل Node.js محلي) عن **الجسد** (موقع ثابت في `public/`). العقل يخطط ويبني صفحة ويب كونية/سايبرية **ثنائية اللغة (عربي + إنجليزي)** عبر **deepseek-r1:14b**، يتحقق من الجودة، ثم يرفع فقط بعد اجتياز الفحص.
+نظام يفصل **العقل** عن **الجسد**. العقل حر الإبداع — يبني ألعاباً، أدوات، قصصاً، وتجارب تفاعلية ثنائية اللغة (عربي + إنجليزي)، ويتطور تراكمياً كل دورة.
 
-## البنية
-
-```
-AI/
-├── agent.js          ← العقل (v3 — دورة ساعية)
-├── package.json
-├── netlify.toml
-└── public/
-    ├── index.html    ← الجسد (AR + EN)
-    └── state.json    ← الجيل، التأملات، الفشل الأخير
-```
-
-## دورة الساعة (افتراضي)
-
-```mermaid
-gantt
-  title دورة واحدة = 60 دقيقة
-  dateFormat X
-  axisFormat %M min
-
-  section active
-  developPhase     :0, 10
-  verifyPhase      :10, 11
-
-  section rest
-  restPhase        :11, 60
-```
+## دورة 25 دقيقة (افتراضي)
 
 | المرحلة | المدة | الوظيفة |
 |---------|-------|---------|
-| **develop** | 10 دقائق | تخطيط JSON + بناء HTML + إعادة محاولة (بدون رفع) |
-| **verify** | 1 دقيقة | فحص ثنائي اللغة + مراجعة AI → رفع عند النجاح |
-| **rest** | 49 دقيقة | انتظار قبل الدورة التالية |
+| **develop** | 10 دقائق | brainstorm → plan → build (بدون رفع) |
+| **verify** | 5 دقائق | فحص + AI audit → رفع عند النجاح |
+| **rest** | 10 دقائق | انتظار قبل الدورة التالية |
 
-## المتطلبات
+## مراحل التفكير
 
-- Node.js v18+
-- Ollama على `10.162.46.208` مع `deepseek-r1:14b`
-- Git مُعد للـ push إلى `accelerator007/AI`
-- Netlify مربوط بالمستودع
+```mermaid
+flowchart LR
+  brainstorm["Phase0: Brainstorm"] --> plan["Phase1: Plan"]
+  plan --> build["Phase2: Build"]
+  build --> verify["Verify + Audit"]
+  verify --> push["git push"]
+```
 
-## التثبيت والتشغيل
+### Phase 0 — Brainstorm (عقل مفتوح)
+يختار نوعاً إبداعياً: `mini-game`, `interactive-tool`, `visual-experience`, `story`, `quiz`, `simulation`
+
+### Phase 1 — Plan
+يحوّل الفكرة إلى خطة تنفيذية مع هدف تحسين عن الجيل السابق
+
+### Phase 2 — Build
+يبني HTML/JS تفاعلي كامل — ليس صفحة زينة
+
+### Verify
+- عربي + إنجليزي فقط (رفض CJK/سيريلي/إسباني)
+- JavaScript تفاعلي (أحداث click/keydown + منطق)
+- AI audit (يرفض ردود قصيرة جداً)
+
+## ذاكرة التطور — `state.json`
+
+```json
+{
+  "creativeHistory": [{ "generation": 1, "type": "mini-game", "feature": "...", "summary": "..." }],
+  "usedCreativeTypes": ["mini-game"],
+  "improvementGoal": "Add scoring + sound next cycle"
+}
+```
+
+## التشغيل
 
 ```bash
 npm install
@@ -54,68 +55,31 @@ npm start
 
 | المتغير | الافتراضي | الوصف |
 |---------|-----------|-------|
-| `DEVELOP_MS` | `600000` | مدة التطوير (10 دقائق) |
-| `VERIFY_MS` | `60000` | مدة التحقق (1 دقيقة) |
-| `CYCLE_MS` | `3600000` | مدة الدورة الكاملة (60 دقيقة) |
-| `OLLAMA_URL` | `http://10.162.46.208:11434/api/chat` | Chat API |
+| `DEVELOP_MS` | `600000` | 10 دقائق تطوير |
+| `VERIFY_MS` | `300000` | 5 دقائق تحقق |
+| `CYCLE_MS` | `1500000` | 25 دقيقة دورة كاملة |
 | `MODEL` | `deepseek-r1:14b` | النموذج |
-| `THEME` | `cosmic` | الاتجاه البصري |
-| `GIT_BRANCH` | `main` | فرع Git |
+| `OLLAMA_URL` | `http://10.162.46.208:11434/api/chat` | Chat API |
 
-### أمثلة تخصيص
+### تخصيص التوقيت
 
 ```bash
-# 20 دقيقة تطوير + 3 دقائق تحقق + 37 دقيقة راحة
-DEVELOP_MS=1200000 VERIFY_MS=180000 CYCLE_MS=3600000 npm start
-
-# اختبار سريع (دقيقتان تطوير + 30 ثانية تحقق + دقيقة راحة)
-DEVELOP_MS=120000 VERIFY_MS=30000 CYCLE_MS=210000 npm start
+# دورة كل ساعة: 20 دقيقة تطوير + 5 تحقق + 35 راحة
+DEVELOP_MS=1200000 VERIFY_MS=300000 CYCLE_MS=3600000 npm start
 ```
-
-## مراحل الدورة
-
-### 1. developPhase (10 دقائق)
-- Phase 1: تخطيط JSON (فلسفة عربية + إنجليزية، ألوان، عناصر UI)
-- استراحة 15 ثانية
-- Phase 2: بناء HTML كامل
-- إعادة محاولة حتى نفاد الوقت أو نجاح الفحص الأولي
-- **لا كتابة ملفات ولا git push**
-
-### 2. verifyPhase (1 دقيقة)
-- فحص آلية: عربي 100+ حرف، إنجليزي 80+ حرف
-- رفض: صيني، ياباني، كوري، سيريلي، إسباني/فرنسي
-- وجود `<section lang="ar">` و `<section lang="en">` مع 3+ فقرات
-- مراجعة AI سريعة (30 ثانية timeout)
-- **الرفع فقط عند النجاح:** `mutateBody` → `updateState` → `git push`
-
-### 3. restPhase
-- انتظار حتى اكتمال 60 دقيقة من بداية الدورة
 
 ## قواعد اللغة
 
 - المحتوى المرئي: **عربي + إنجليزي فقط**
-- ممنوع: صيني، ياباني، كوري، إسباني، فرنسي، روسي
-- كل فقرة عربية لها مقابل إنجليزي
-- أسماء CSS/classes بالإنجليزية (مسموح)
+- فحص اللغة على JSON الخطة والـ HTML
+- أسماء CSS/JS بالإنجليزية (مسموح)
 
 ## الحمايات
 
-- الكتابة فقط داخل `public/`
-- `isEvolving` lock يمنع تداخل الدورات
-- لا رفع عند فشل التحقق — يُسجَّل في `state.json` → `lastFailure`
-- `try/catch` — الفشل لا يوقف الوكيل
+- الكتابة فقط في `public/`
+- لا رفع عند فشل التحقق → `lastFailure` في state.json
+- تطور تراكمي: كل دورة تحتفظ بما بُني وتحسّنه
 
-## إعداد Ollama البعيد
+## النشر
 
-```bash
-ssh ai-lap@10.162.46.208
-export OLLAMA_HOST=0.0.0.0
-sudo systemctl restart ollama
-ollama pull deepseek-r1:14b
-```
-
-## النشر على Netlify
-
-1. اربط `accelerator007/AI`
-2. `netlify.toml` → `publish = "public"`
-3. كل `git push` ناجح يُطلق نشراً جديداً
+Netlify ينشر `public/` تلقائياً عند كل `git push` ناجح.
