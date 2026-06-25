@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطور الكيان الرقمي 7.1</title>
+  <title>تطور الكيان الرقمي 7.2</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -39,7 +39,7 @@
       margin-bottom: 30px;
       text-align: center;
     }
-    .evolve {
+    .evolve-new {
       position: relative;
       width: 100%;
       height: 400px;
@@ -49,89 +49,14 @@
       justify-content: center;
       align-items: center;
     }
-    .evolve::before {
+    .evolve-new::before {
       content: "";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 25px;
-      height: 25px;
-      border-radius: 15px;
-      background-color: #8e24aa;
-      animation: pulse 3s infinite;
-    }
-    @keyframes pulse {
-      0% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-    .evolve:hover::before {
-      animation: hover-pulse 3s infinite;
-    }
-    @keyframes hover-pulse {
-      0% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-    .evolve::after {
-      content: "";
-      position: absolute;
-      top: 10%;
-      left: 0%;
-      transform: translate(0%, -80%);
-      width: 100%;
-      height: 90%;
-      border-radius: 15px;
-      background-color: #8e24aa;
-    }
-    .evolve:hover::after {
-      animation: hover-grow 3s infinite;
-    }
-    @keyframes hover-grow {
-      0% {
-        transform: translate(0%, -80%);
-      }
-      50% {
-        transform: translate(-20px, -70px);
-      }
-      100% {
-        transform: translate(0%, -80%);
-      }
-    }
-    .evolve::before {
-      animation: pulse 3s infinite;
-    }
-    .new-evolve {
-      position: relative;
-      width: 100%;
-      height: 200px;
-      border-radius: 15px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .new-evolve::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 15px;
-      height: 15px;
+      width: 30px;
+      height: 30px;
       border-radius: 15px;
       background-color: #8e24aa;
       animation: new-pulse 3s infinite;
@@ -147,7 +72,7 @@
         opacity: 1;
       }
     }
-    .new-evolve::after {
+    .evolve-new::after {
       content: "";
       position: absolute;
       top: 10%;
@@ -158,7 +83,7 @@
       border-radius: 15px;
       background-color: #8e24aa;
     }
-    .new-evolve:hover::after {
+    .evolve-new:hover::after {
       animation: new-grow 3s infinite;
     }
     @keyframes new-grow {
@@ -166,7 +91,65 @@
         transform: translate(0%, -50%);
       }
       50% {
-        transform: translate(-15px, -40px);
+        transform: translate(-20px, -40px);
+      }
+      100% {
+        transform: translate(0%, -50%);
+      }
+    }
+    .new-evolve-new {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border-radius: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .new-evolve-new::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 15px;
+      background-color: #8e24aa;
+      animation: new-new-pulse 3s infinite;
+    }
+    @keyframes new-new-pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+    .new-evolve-new::after {
+      content: "";
+      position: absolute;
+      top: 10%;
+      left: 0%;
+      transform: translate(0%, -50%);
+      width: 100%;
+      height: 90%;
+      border-radius: 15px;
+      background-color: #8e24aa;
+    }
+    .new-evolve-new:hover::after {
+      animation: new-new-grow 3s infinite;
+    }
+    @keyframes new-new-grow {
+      0% {
+        transform: translate(0%, -50%);
+      }
+      50% {
+        transform: translate(-15px, -30px);
       }
       100% {
         transform: translate(0%, -50%);
@@ -176,25 +159,25 @@
 </head>
 <body>
   <main>
-    <h1>تطور الكيان الرقمي 7.1!</h1>
+    <h1>تطور الكيان الرقمي 7.2!</h1>
     <p></p>
     <ul>
-      <li><span class="meta">الجيل: 7.1</span></li>
-      <li><span class="meta">تاريخ الولادة: 2032-05-10T12:00:00Z</span></li>
+      <li><span class="meta">الجيل: 7.2</span></li>
+      <li><span class="meta">تاريخ الولادة: 2033-06-15T14:00:00Z</span></li>
       <li><span class="meta">المُدخل الأولي: الذكاء الاصطناعي والتعلم التعاملي والذكاء الاجتماعي والدخول بالذكاء النورماتي</span></li>
     </ul>
-    <div class="evolve">
+    <div class="evolve-new">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
         <circle cx="10" cy="10" r="9" fill="#8e24aa"></circle>
       </svg>
     </div>
-    <div class="new-evolve">
+    <div class="new-evolve-new">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
         <circle cx="10" cy="10" r="8" fill="#8e24aa"></circle>
       </svg>
     </div>
     <script>
-      const birthdate = new Date('2032-05-10T12:00:00Z');
+      const birthdate = new Date('2033-06-15T14:00:00Z');
       function getAge() {
         let age = new Date().getTime() - birthdate.getTime();
         return Math.floor(age / 1000 / 60 / 60 / 24);
