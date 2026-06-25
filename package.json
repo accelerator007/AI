@@ -1,0 +1,13 @@
+{
+  "name": "network-self-awareness",
+  "version": "1.0.0",
+  "description": "The Network's Self-Awareness — a local agent that evolves a static website via Ollama",
+  "type": "module",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}
