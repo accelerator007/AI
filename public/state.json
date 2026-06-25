@@ -5,7 +5,7 @@
   "lastPlan": null,
   "lastFailure": "Develop window expired without valid candidate",
   "lastCycleDuration": {
-    "develop": 605744,
+    "develop": 608362,
     "verify": 0,
     "rest": 0
   },

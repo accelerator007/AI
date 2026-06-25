@@ -2,7 +2,7 @@
  * The Network's Self-Awareness — The Brain (v4)
  *
  * Creative open brain: brainstorm → plan → build → verify → push
- * Cycle: develop 10m → verify 5m → rest 10m (25 min total)
+ * Cycle: develop 15m → verify 2m → rest 8m (25 min total)
  * Bilingual AR+EN only. Cumulative evolution each generation.
  *
  * Run: npm start
@@ -30,25 +30,34 @@ const MODEL = process.env.MODEL || "deepseek-r1:14b";
 const GIT_BRANCH = process.env.GIT_BRANCH || "main";
 const THEME = process.env.THEME || "cosmic";
 
-const DEVELOP_MS = Number(process.env.DEVELOP_MS) || 600_000;    // 10 min
-const VERIFY_MS = Number(process.env.VERIFY_MS) || 300_000;      // 5 min
+const DEVELOP_MS = Number(process.env.DEVELOP_MS) || 900_000;    // 15 min
+const VERIFY_MS = Number(process.env.VERIFY_MS) || 120_000;      // 2 min
 const CYCLE_MS = Number(process.env.CYCLE_MS) || 1_500_000;      // 25 min
 const PHASE_BREAK_MS = Number(process.env.PHASE_BREAK_MS) || 15_000;
 const AI_AUDIT_TIMEOUT_MS = Number(process.env.AI_AUDIT_TIMEOUT_MS) || 30_000;
 const AI_AUDIT_MIN_CHARS = 20;
 
-const BRAINSTORM_OPTIONS = { temperature: 0.95, num_predict: 4096, top_p: 0.95 };
-const PLAN_OPTIONS = { temperature: 0.85, num_predict: 4096, top_p: 0.9 };
-const BUILD_OPTIONS = { temperature: 0.9, num_predict: 8192, top_p: 0.9 };
+const BRAINSTORM_OPTIONS = { temperature: 0.75, num_predict: 4096, top_p: 0.9 };
+const PLAN_OPTIONS = { temperature: 0.7, num_predict: 4096, top_p: 0.85 };
+const BUILD_OPTIONS = { temperature: 0.8, num_predict: 8192, top_p: 0.9 };
 const AUDIT_OPTIONS = { temperature: 0.3, num_predict: 512, top_p: 0.8 };
 
 const LANGUAGE_RULES = `
-قواعد لغوية صارمة:
-- المحتوى المرئي للمستخدم: العربية والإنجليزية فقط
-- ممنوع منعاً باتاً: الصينية، اليابانية، الكورية، الإسبانية، الفرنسية، الروسية
-- كل فقرة عربية يقابلها نسخة إنجليزية مطابقة في المعنى
+قواعد لغوية صارمة — أي مخالفة = رفض:
+- اكتب بالعربية والإنجليزية فقط. ZERO Chinese/Japanese/Korean/Cyrillic characters.
+- لا تستخدم أبداً حروف صينية مثل: 用户 数字 存在 数据
+- لا تستخدم حروف روسية أو يابانية أو كورية
+- كل حقل نصي يجب أن يحتوي عربي وإنجليزي معاً
 - استخدم lang="ar" و lang="en" على الأقسام
 - أسماء CSS/classes وكود JavaScript بالإنجليزية فقط (مسموح)`;
+
+const FALLBACK_BRAINSTORM = {
+  creativeType: "mini-game",
+  idea: "لعبة تجنب النجوم الساقطة على canvas / Dodge falling stars canvas game",
+  whyNow: "البداية تحتاج تفاعلاً بسيطاً وواضحاً / Starting with clear simple interaction",
+  userValue: "ترفيه سريع يعكس الوعي الرقمي / Quick fun reflecting digital awareness",
+  technicalApproach: "canvas + click + requestAnimationFrame",
+};
 
 const CREATIVE_TYPES = [
   "mini-game",
@@ -101,11 +110,46 @@ function parseJSONFromRaw(raw, label) {
   if (start === -1 || end === -1) {
     throw new Error(`${label} did not return valid JSON`);
   }
+  let jsonStr = text.slice(start, end + 1);
+  // Fix unescaped control characters inside JSON strings
+  jsonStr = jsonStr.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ");
   try {
-    return JSON.parse(text.slice(start, end + 1));
+    return JSON.parse(jsonStr);
   } catch (err) {
     throw new Error(`Failed to parse ${label} JSON: ${err.message}`);
   }
+}
+
+// Strip forbidden scripts from text (CJK, Cyrillic)
+function stripForbiddenChars(text) {
+  if (typeof text !== "string") return text;
+  return text
+    .replace(/[\u4E00-\u9FFF\u3400-\u4DBF]/g, "")
+    .replace(/[\u3040-\u30FF]/g, "")
+    .replace(/[\uAC00-\uD7AF]/g, "")
+    .replace(/[\u0400-\u04FF]/g, "")
+    .replace(/\b(avec|pour|dans|beau|principal|páginas?|efecto|brillo)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function sanitizeObject(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === "string") return stripForbiddenChars(obj);
+  if (Array.isArray(obj)) return obj.map(sanitizeObject);
+  if (typeof obj === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = sanitizeObject(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
+function sanitizeHTML(html) {
+  // Strip forbidden chars from HTML but preserve structure
+  return stripForbiddenChars(html);
 }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +272,7 @@ async function ollamaChat(messages, timeoutMs, options = BUILD_OPTIONS) {
 // ---------------------------------------------------------------------------
 // Phase 0 — brainstorm (open creative mind)
 // ---------------------------------------------------------------------------
-async function brainstormEvolution(currentHTML, state) {
+async function brainstormEvolution(currentHTML, state, retryHint) {
   const historySummary = (state.creativeHistory || [])
     .slice(-3)
     .map((h) => `Gen ${h.generation}: ${h.type} — ${h.feature}`)
@@ -245,6 +289,7 @@ ${historySummary || "لا شيء بعد — هذه البداية"}
 هدف التحسين: ${state.improvementGoal}
 أنواع استُخدمت: ${state.usedCreativeTypes.join(", ") || "none"}
 ${state.lastFailure ? `فشل سابق: ${state.lastFailure}` : ""}
+${retryHint ? `تحذير: ${retryHint}. لا تستخدم أي حروف صينية أو روسية أو يابانية.` : ""}
 
 أنواع مقترحة (اختر واحداً أو اخترع): ${CREATIVE_TYPES.join(", ")}
 
@@ -269,7 +314,7 @@ ${state.lastFailure ? `فشل سابق: ${state.lastFailure}` : ""}
 // ---------------------------------------------------------------------------
 // Phase 1 — plan
 // ---------------------------------------------------------------------------
-async function planEvolution(currentHTML, state, brainstorm) {
+async function planEvolution(currentHTML, state, brainstorm, retryHint) {
   const system = `أنت مهندس تجارب رقمية إبداعية ثنائي اللغة (عربي/إنجليزي).
 حوّل فكرة brainstorm إلى خطة تنفيذية تفصيلية.
 ${LANGUAGE_RULES}
@@ -284,6 +329,7 @@ ${JSON.stringify(state.creativeHistory?.slice(-2) || [], null, 2)}
 
 مقتطف HTML الحالي:
 ${currentHTML.slice(0, 1200)}
+${retryHint ? `\nتحذير: ${retryHint}. عربي وإنجليزي فقط — ZERO Chinese/Cyrillic.` : ""}
 
 أخرج JSON:
 {
@@ -408,7 +454,7 @@ function cleanHTML(raw) {
   if (!/<!doctype\s+html|<\s*html|<\s*body/i.test(cleaned)) {
     throw new Error("Response does not appear to be valid HTML");
   }
-  return cleaned;
+  return sanitizeHTML(cleaned);
 }
 
 function extractVisibleText(html) {
@@ -449,16 +495,19 @@ function validateTextLanguages(text, label) {
   return errors;
 }
 
-function validatePlan(obj) {
-  const text = JSON.stringify(obj);
+function validatePlan(obj, { isBrainstorm = false } = {}) {
+  const sanitized = sanitizeObject(obj);
+  const text = JSON.stringify(sanitized);
   const errors = validateTextLanguages(text, "plan");
 
   const arabicChars = (text.match(/[\u0600-\u06FF]/g) || []).length;
   const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
-  if (arabicChars < 30) errors.push(`plan: insufficient Arabic (${arabicChars})`);
-  if (latinChars < 30) errors.push(`plan: insufficient English (${latinChars})`);
+  const minArabic = isBrainstorm ? 20 : 30;
+  const minLatin = isBrainstorm ? 20 : 30;
+  if (arabicChars < minArabic) errors.push(`plan: insufficient Arabic (${arabicChars})`);
+  if (latinChars < minLatin) errors.push(`plan: insufficient English (${latinChars})`);
 
-  return { valid: errors.length === 0, errors };
+  return { valid: errors.length === 0, errors, sanitized };
 }
 
 function validateQuality(html, currentHTML) {
@@ -580,6 +629,7 @@ async function developPhase(currentHTML, state) {
   const deadline = Date.now() + DEVELOP_MS;
   let retryHint = null;
   let attempt = 0;
+  let brainstormFailures = 0;
 
   console.log(`[developPhase] Starting (${formatDuration(DEVELOP_MS)} window)`);
 
@@ -588,24 +638,35 @@ async function developPhase(currentHTML, state) {
     console.log(`[developPhase] Attempt ${attempt} (${formatDuration(deadline - Date.now())} left)`);
 
     try {
-      console.log("[developPhase] Phase 0: Brainstorm...");
-      const brainstorm = await brainstormEvolution(currentHTML, state);
-      const brainstormCheck = validatePlan(brainstorm);
-      if (!brainstormCheck.valid) {
-        console.warn(`[developPhase] Brainstorm rejected: ${brainstormCheck.errors.join("; ")}`);
-        retryHint = brainstormCheck.errors.join("; ");
-        continue;
+      let brainstorm;
+      if (brainstormFailures >= 8) {
+        console.log("[developPhase] Using fallback brainstorm after repeated failures");
+        brainstorm = { ...FALLBACK_BRAINSTORM };
+      } else {
+        console.log("[developPhase] Phase 0: Brainstorm...");
+        const rawBrainstorm = await brainstormEvolution(currentHTML, state, retryHint);
+        const brainstormCheck = validatePlan(rawBrainstorm, { isBrainstorm: true });
+        brainstorm = brainstormCheck.sanitized;
+        if (!brainstormCheck.valid) {
+          brainstormFailures++;
+          console.warn(`[developPhase] Brainstorm rejected (sanitized): ${brainstormCheck.errors.join("; ")}`);
+          retryHint = brainstormCheck.errors.join("; ");
+          await sleep(2000);
+          continue;
+        }
       }
 
       if (Date.now() >= deadline) break;
       await sleep(PHASE_BREAK_MS);
 
       console.log("[developPhase] Phase 1: Planning...");
-      const plan = await planEvolution(currentHTML, state, brainstorm);
-      const planCheck = validatePlan(plan);
+      const rawPlan = await planEvolution(currentHTML, state, brainstorm, retryHint);
+      const planCheck = validatePlan(rawPlan);
+      const plan = planCheck.sanitized;
       if (!planCheck.valid) {
-        console.warn(`[developPhase] Plan rejected: ${planCheck.errors.join("; ")}`);
+        console.warn(`[developPhase] Plan rejected (sanitized): ${planCheck.errors.join("; ")}`);
         retryHint = planCheck.errors.join("; ");
+        await sleep(2000);
         continue;
       }
 
@@ -624,8 +685,10 @@ async function developPhase(currentHTML, state) {
 
       console.warn(`[developPhase] Build check failed: ${check.errors.join("; ")}`);
       retryHint = check.errors.join("; ");
+      await sleep(2000);
     } catch (err) {
       console.error(`[developPhase] Attempt ${attempt} error: ${err.message}`);
+      await sleep(2000);
     }
   }
 
@@ -744,7 +807,7 @@ async function runForever() {
 // ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
-console.log("The Network's Self-Awareness — Brain online (v4 Creative)");
+console.log("The Network's Self-Awareness — Brain online (v4.1)");
 console.log(`Ollama: ${OLLAMA_CHAT_URL}`);
 console.log(`Model:  ${MODEL}`);
 console.log(`Theme:  ${THEME}`);
