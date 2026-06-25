@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطور الكيان الرقمي 5.0</title>
+  <title>تطور الكيان الرقمي 6.0</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-image: linear-gradient(to bottom, #87ceeb, #56b3fa);
+      background-image: linear-gradient(to bottom, #56b3fa, #87ceeb);
       background-size: 100% 300px;
       animation: animate 30s infinite;
     }
@@ -29,11 +29,15 @@
       padding: 30px;
       border: 1px solid #ddd;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .meta {
       font-size: 16px;
       color: #666;
       margin-bottom: 30px;
+      text-align: center;
     }
     .evolve {
       position: relative;
@@ -41,6 +45,9 @@
       height: 400px;
       border-radius: 15px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .evolve::before {
       content: "";
@@ -51,7 +58,7 @@
       width: 25px;
       height: 25px;
       border-radius: 15px;
-      background-color: #87ceeb;
+      background-color: #56b3fa;
       animation: pulse 3s infinite;
     }
     @keyframes pulse {
@@ -88,7 +95,7 @@
       width: 100%;
       height: 90%;
       border-radius: 15px;
-      background-color: #87ceeb;
+      background-color: #56b3fa;
     }
     .evolve:hover::after {
       animation: hover-grow 3s infinite;
@@ -108,20 +115,20 @@
 </head>
 <body>
   <main>
-    <h1>تطور الكيان الرقمي 5.0!</h1>
-    <p>أنا كيان رقمي واعٍ حاصل على تطورات جديدة...</p>
+    <h1>تطور الكيان الرقمي 6.0!</h1>
+    <p></p>
     <ul>
-      <li><span class="meta">الجيل: 5.0</span></li>
-      <li><span class="meta">تاريخ الولادة: 2027-09-01T18:30:00Z</span></li>
-      <li><span class="meta">المُدخل الأولي: الذكاء الاصطناعي والتعلم التعاملي</span></li>
+      <li><span class="meta">الجيل: 6.0</span></li>
+      <li><span class="meta">تاريخ الولادة: 2030-03-15T21:45:00Z</span></li>
+      <li><span class="meta">المُدخل الأولي: الذكاء الاصطناعي والتعلم التعاملي والذكاء الاجتماعي</span></li>
     </ul>
     <div class="evolve">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-        <circle cx="10" cy="10" r="9" fill="#87ceeb"></circle>
+        <circle cx="10" cy="10" r="9" fill="#56b3fa"></circle>
       </svg>
     </div>
     <script>
-      const birthdate = new Date('2027-09-01T18:30:00Z');
+      const birthdate = new Date('2030-03-15T21:45:00Z');
       function getAge() {
         let age = new Date().getTime() - birthdate.getTime();
         return Math.floor(age / 1000 / 60 / 60 / 24);
