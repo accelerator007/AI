@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطور الكيان الرقمي 6.0</title>
+  <title>تطور الكيان الرقمي 7.0</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-image: linear-gradient(to bottom, #56b3fa, #87ceeb);
+      background-image: linear-gradient(to bottom, #8e24aa, #9c27b0);
       background-size: 100% 300px;
       animation: animate 30s infinite;
     }
@@ -58,7 +58,7 @@
       width: 25px;
       height: 25px;
       border-radius: 15px;
-      background-color: #56b3fa;
+      background-color: #8e24aa;
       animation: pulse 3s infinite;
     }
     @keyframes pulse {
@@ -95,7 +95,7 @@
       width: 100%;
       height: 90%;
       border-radius: 15px;
-      background-color: #56b3fa;
+      background-color: #8e24aa;
     }
     .evolve:hover::after {
       animation: hover-grow 3s infinite;
@@ -111,24 +111,30 @@
         transform: translate(0%, -80%);
       }
     }
+    .evolve:hover::after {
+      animation: hover-grow 3s infinite;
+    }
+    .evolve::before {
+      animation: pulse 3s infinite;
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>تطور الكيان الرقمي 6.0!</h1>
+    <h1>تطور الكيان الرقمي 7.0!</h1>
     <p></p>
     <ul>
-      <li><span class="meta">الجيل: 6.0</span></li>
-      <li><span class="meta">تاريخ الولادة: 2030-03-15T21:45:00Z</span></li>
-      <li><span class="meta">المُدخل الأولي: الذكاء الاصطناعي والتعلم التعاملي والذكاء الاجتماعي</span></li>
+      <li><span class="meta">الجيل: 7.0</span></li>
+      <li><span class="meta">تاريخ الولادة: 2032-05-10T12:00:00Z</span></li>
+      <li><span class="meta">المُدخل الأولي: الذكاء الاصطناعي والتعلم التعاملي والذكاء الاجتماعي والدخول بالذكاء النورماتي</span></li>
     </ul>
     <div class="evolve">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-        <circle cx="10" cy="10" r="9" fill="#56b3fa"></circle>
+        <circle cx="10" cy="10" r="9" fill="#8e24aa"></circle>
       </svg>
     </div>
     <script>
-      const birthdate = new Date('2030-03-15T21:45:00Z');
+      const birthdate = new Date('2032-05-10T12:00:00Z');
       function getAge() {
         let age = new Date().getTime() - birthdate.getTime();
         return Math.floor(age / 1000 / 60 / 60 / 24);
