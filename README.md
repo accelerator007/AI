@@ -1,51 +1,47 @@
 # المراقب الذاتي للشبكة (The Network's Self-Awareness)
 
-نظام يفصل **العقل** (وكيل Node.js محلي) عن **الجسد** (موقع ثابت في `public/`). العقل يخطط ويبني صفحة ويب كونية/سايبرية عبر نموذج **deepseek-r1:14b**، يفحص الجودة، ثم يرفع التحديثات عبر Git لينشرها Netlify.
+نظام يفصل **العقل** (وكيل Node.js محلي) عن **الجسد** (موقع ثابت في `public/`). العقل يخطط ويبني صفحة ويب كونية/سايبرية **ثنائية اللغة (عربي + إنجليزي)** عبر **deepseek-r1:14b**، يتحقق من الجودة، ثم يرفع فقط بعد اجتياز الفحص.
 
 ## البنية
 
 ```
 AI/
-├── agent.js          ← العقل (يعمل محلياً، لا يُرفع لـ Netlify)
+├── agent.js          ← العقل (v3 — دورة ساعية)
 ├── package.json
-├── netlify.toml      ← ينشر مجلد public/ فقط
-└── public/           ← الجسد (يُعدَّل ويُرفع)
-    ├── index.html
-    └── state.json    ← تتبع الجيل والتأملات
+├── netlify.toml
+└── public/
+    ├── index.html    ← الجسد (AR + EN)
+    └── state.json    ← الجيل، التأملات، الفشل الأخير
 ```
+
+## دورة الساعة (افتراضي)
+
+```mermaid
+gantt
+  title دورة واحدة = 60 دقيقة
+  dateFormat X
+  axisFormat %M min
+
+  section active
+  developPhase     :0, 10
+  verifyPhase      :10, 11
+
+  section rest
+  restPhase        :11, 60
+```
+
+| المرحلة | المدة | الوظيفة |
+|---------|-------|---------|
+| **develop** | 10 دقائق | تخطيط JSON + بناء HTML + إعادة محاولة (بدون رفع) |
+| **verify** | 1 دقيقة | فحص ثنائي اللغة + مراجعة AI → رفع عند النجاح |
+| **rest** | 49 دقيقة | انتظار قبل الدورة التالية |
 
 ## المتطلبات
 
-- **Node.js** v18+
-- **Ollama** على جهاز بعيد (`10.162.46.208`) مع نموذج `deepseek-r1:14b`
-- **Git** مُعد مع وصول push إلى `accelerator007/AI`
-- **Netlify** مربوط بالمستودع
-
-## إعداد Ollama على الجهاز البعيد
-
-```bash
-ssh ai-lap@10.162.46.208
-```
-
-### السماح بالاتصالات من الشبكة
-
-```bash
-export OLLAMA_HOST=0.0.0.0
-sudo systemctl restart ollama
-sudo ufw allow 11434/tcp
-```
-
-### سحب النموذج
-
-```bash
-ollama pull deepseek-r1:14b
-```
-
-### التحقق
-
-```bash
-curl http://10.162.46.208:11434/api/tags
-```
+- Node.js v18+
+- Ollama على `10.162.46.208` مع `deepseek-r1:14b`
+- Git مُعد للـ push إلى `accelerator007/AI`
+- Netlify مربوط بالمستودع
 
 ## التثبيت والتشغيل
 
@@ -54,80 +50,72 @@ npm install
 npm start
 ```
 
-الوكيل يشغّل دورة فوراً ثم كل **30 دقيقة** (افتراضياً).
-
-> **ملاحظة:** deepseek-r1:14b أبطأ من llama3 (~30–90 ثانية لكل مرحلة). الدورة الكاملة (تخطيط + بناء) قد تستغرق 1–3 دقائق.
-
 ## متغيرات البيئة
 
 | المتغير | الافتراضي | الوصف |
 |---------|-----------|-------|
-| `OLLAMA_URL` | `http://10.162.46.208:11434/api/chat` | عنوان Chat API |
-| `OLLAMA_BASE` | `http://10.162.46.208:11434` | قاعدة عنوان Ollama |
-| `MODEL` | `deepseek-r1:14b` | اسم النموذج |
-| `INTERVAL_MS` | `1800000` | الفترة بين الدورات (30 دقيقة) |
+| `DEVELOP_MS` | `600000` | مدة التطوير (10 دقائق) |
+| `VERIFY_MS` | `60000` | مدة التحقق (1 دقيقة) |
+| `CYCLE_MS` | `3600000` | مدة الدورة الكاملة (60 دقيقة) |
+| `OLLAMA_URL` | `http://10.162.46.208:11434/api/chat` | Chat API |
+| `MODEL` | `deepseek-r1:14b` | النموذج |
 | `THEME` | `cosmic` | الاتجاه البصري |
-| `GIT_BRANCH` | `main` | فرع Git للرفع |
+| `GIT_BRANCH` | `main` | فرع Git |
 
-### أمثلة
+### أمثلة تخصيص
 
 ```bash
-# اختبار سريع — دورة كل 5 دقائق
-INTERVAL_MS=300000 npm start
+# 20 دقيقة تطوير + 3 دقائق تحقق + 37 دقيقة راحة
+DEVELOP_MS=1200000 VERIFY_MS=180000 CYCLE_MS=3600000 npm start
 
-# نموذج بديل
-MODEL=llama3.1:latest npm start
+# اختبار سريع (دقيقتان تطوير + 30 ثانية تحقق + دقيقة راحة)
+DEVELOP_MS=120000 VERIFY_MS=30000 CYCLE_MS=210000 npm start
 ```
 
-## دورة التطور (v2 — ثنائية المراحل)
+## مراحل الدورة
 
-```mermaid
-flowchart TD
-  Read["readBody + readState"] --> Plan["Phase 1: تخطيط JSON"]
-  Plan --> Build["Phase 2: بناء HTML كامل"]
-  Build --> Validate["validateQuality"]
-  Validate -->|"نجح"| Write["mutateBody + updateState"]
-  Validate -->|"فشل"| Retry["إعادة محاولة مرة"]
-  Retry --> Build
-  Write --> Push["git push → Netlify"]
-```
+### 1. developPhase (10 دقائق)
+- Phase 1: تخطيط JSON (فلسفة عربية + إنجليزية، ألوان، عناصر UI)
+- استراحة 15 ثانية
+- Phase 2: بناء HTML كامل
+- إعادة محاولة حتى نفاد الوقت أو نجاح الفحص الأولي
+- **لا كتابة ملفات ولا git push**
 
-1. **Phase 1 — التخطيط:** deepseek-r1 يُخرج JSON (فلسفة، ألوان، عناصر UI، تفاعل)
-2. **Phase 2 — البناء:** يبني HTML كوني/سايبر كامل من الخطة
-3. **validateQuality:** يرفض المخرجات الضعيفة (نص عربي قليل، CSS مكرر، بدون حركة...)
-4. **إعادة محاولة:** محاولة ثانية بتحذير إذا رُفضت الجودة
-5. **updateState:** تحديث `state.json` (الجيل، التأمل، الخطة)
-6. **pushToNetwork:** رفع إلى GitHub → Netlify
+### 2. verifyPhase (1 دقيقة)
+- فحص آلية: عربي 100+ حرف، إنجليزي 80+ حرف
+- رفض: صيني، ياباني، كوري، سيريلي، إسباني/فرنسي
+- وجود `<section lang="ar">` و `<section lang="en">` مع 3+ فقرات
+- مراجعة AI سريعة (30 ثانية timeout)
+- **الرفع فقط عند النجاح:** `mutateBody` → `updateState` → `git push`
 
-## فحص الجودة (Quality Gate)
+### 3. restPhase
+- انتظار حتى اكتمال 60 دقيقة من بداية الدورة
 
-يرفض HTML قبل الكتابة إذا:
+## قواعد اللغة
 
-- أقل من 2000 حرف أو أكثر من 50000
-- نص عربي أقل من 100 حرف
-- أقل من 5 قواعد CSS
-- بدون animation أو canvas أو requestAnimationFrame
-- تكرار class name 3+ مرات
-- تشابه > 90% مع HTML الحالي
-- فقرات فارغة
+- المحتوى المرئي: **عربي + إنجليزي فقط**
+- ممنوع: صيني، ياباني، كوري، إسباني، فرنسي، روسي
+- كل فقرة عربية لها مقابل إنجليزي
+- أسماء CSS/classes بالإنجليزية (مسموح)
 
-## الحمايات (Failsafes)
+## الحمايات
 
-- الكتابة **فقط** داخل `public/` — لا يلمس `agent.js`
+- الكتابة فقط داخل `public/`
 - `isEvolving` lock يمنع تداخل الدورات
-- `try/catch` قوي — الفشل لا يوقف الوكيل
-- تنظيف ردود deepseek (إزالة `` و Markdown)
-- تخطي `git push` إذا لا تغييرات
+- لا رفع عند فشل التحقق — يُسجَّل في `state.json` → `lastFailure`
+- `try/catch` — الفشل لا يوقف الوكيل
 
-## خيار احتياطي: نفق SSH
+## إعداد Ollama البعيد
 
 ```bash
-ssh -L 11434:localhost:11434 ai-lap@10.162.46.208
-OLLAMA_URL=http://localhost:11434/api/chat npm start
+ssh ai-lap@10.162.46.208
+export OLLAMA_HOST=0.0.0.0
+sudo systemctl restart ollama
+ollama pull deepseek-r1:14b
 ```
 
 ## النشر على Netlify
 
-1. اربط مستودع `accelerator007/AI`
-2. `netlify.toml` يحدد `publish = "public"`
-3. كل `git push` يُطلق نشراً جديداً
+1. اربط `accelerator007/AI`
+2. `netlify.toml` → `publish = "public"`
+3. كل `git push` ناجح يُطلق نشراً جديداً
