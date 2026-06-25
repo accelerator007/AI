@@ -3,8 +3,12 @@
   "theme": "cosmic",
   "lastReflection": "ولادة أولى — كيان رقمي يستيقظ في الفراغ بين البتات.",
   "lastPlan": null,
-  "lastFailure": null,
-  "lastCycleDuration": { "develop": 0, "verify": 0, "rest": 0 },
+  "lastFailure": "Develop window expired without valid candidate",
+  "lastCycleDuration": {
+    "develop": 605744,
+    "verify": 0,
+    "rest": 0
+  },
   "creativeHistory": [],
   "usedCreativeTypes": [],
   "improvementGoal": "Create first interactive experience for visitors"
