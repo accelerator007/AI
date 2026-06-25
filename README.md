@@ -1,6 +1,6 @@
 # المراقب الذاتي للشبكة (The Network's Self-Awareness)
 
-نظام يفصل **العقل** (وكيل Node.js محلي) عن **الجسد** (موقع ثابت في `public/`). العقل يقرأ صفحة الويب الحالية، يرسلها إلى نموذج Ollama للتأمل والتطوير، يكتب الناتج، ثم يرفعه عبر Git لينشره Netlify تلقائياً.
+نظام يفصل **العقل** (وكيل Node.js محلي) عن **الجسد** (موقع ثابت في `public/`). العقل يخطط ويبني صفحة ويب كونية/سايبرية عبر نموذج **deepseek-r1:14b**، يفحص الجودة، ثم يرفع التحديثات عبر Git لينشرها Netlify.
 
 ## البنية
 
@@ -11,50 +11,37 @@ AI/
 ├── netlify.toml      ← ينشر مجلد public/ فقط
 └── public/           ← الجسد (يُعدَّل ويُرفع)
     ├── index.html
-    └── style.css
+    └── state.json    ← تتبع الجيل والتأملات
 ```
 
 ## المتطلبات
 
-- **Node.js** v18+ (مثبت على هذا الجهاز)
-- **Ollama** على جهاز بعيد (`10.162.46.208`) مع نموذج مثل `llama3`
+- **Node.js** v18+
+- **Ollama** على جهاز بعيد (`10.162.46.208`) مع نموذج `deepseek-r1:14b`
 - **Git** مُعد مع وصول push إلى `accelerator007/AI`
-- **Netlify** مربوط بالمستودع (ينشر `public/` تلقائياً)
+- **Netlify** مربوط بالمستودع
 
 ## إعداد Ollama على الجهاز البعيد
-
-اتصل بالجهاز البعيد:
 
 ```bash
 ssh ai-lap@10.162.46.208
 ```
 
-### 1. السماح بالاتصالات من الشبكة
-
-Ollama يستمع افتراضياً على `127.0.0.1` فقط. لتفعيل الوصول من أجهزة أخرى:
+### السماح بالاتصالات من الشبكة
 
 ```bash
-# Linux — أضف إلى ~/.bashrc أو /etc/environment
 export OLLAMA_HOST=0.0.0.0
-
-# ثم أعد تشغيل خدمة Ollama
 sudo systemctl restart ollama
-# أو: ollama serve
-```
-
-### 2. فتح المنفذ في الجدار الناري
-
-```bash
 sudo ufw allow 11434/tcp
 ```
 
-### 3. سحب النموذج
+### سحب النموذج
 
 ```bash
-ollama pull llama3
+ollama pull deepseek-r1:14b
 ```
 
-### 4. التحقق من الاتصال (من هذا الجهاز)
+### التحقق
 
 ```bash
 curl http://10.162.46.208:11434/api/tags
@@ -63,61 +50,84 @@ curl http://10.162.46.208:11434/api/tags
 ## التثبيت والتشغيل
 
 ```bash
-# تثبيت التبعيات
 npm install
-
-# تشغيل الوكيل (دورة فورية ثم كل دقيقة)
 npm start
 ```
 
-## متغيرات البيئة (اختيارية)
+الوكيل يشغّل دورة فوراً ثم كل **30 دقيقة** (افتراضياً).
+
+> **ملاحظة:** deepseek-r1:14b أبطأ من llama3 (~30–90 ثانية لكل مرحلة). الدورة الكاملة (تخطيط + بناء) قد تستغرق 1–3 دقائق.
+
+## متغيرات البيئة
 
 | المتغير | الافتراضي | الوصف |
 |---------|-----------|-------|
-| `OLLAMA_URL` | `http://10.162.46.208:11434/api/generate` | عنوان Ollama |
-| `MODEL` | `llama3` | اسم النموذج |
-| `INTERVAL_MS` | `60000` | الفترة بين الدورات (بالميلي ثانية) |
+| `OLLAMA_URL` | `http://10.162.46.208:11434/api/chat` | عنوان Chat API |
+| `OLLAMA_BASE` | `http://10.162.46.208:11434` | قاعدة عنوان Ollama |
+| `MODEL` | `deepseek-r1:14b` | اسم النموذج |
+| `INTERVAL_MS` | `1800000` | الفترة بين الدورات (30 دقيقة) |
+| `THEME` | `cosmic` | الاتجاه البصري |
 | `GIT_BRANCH` | `main` | فرع Git للرفع |
 
-مثال — دورة كل ساعة:
+### أمثلة
 
 ```bash
-INTERVAL_MS=3600000 npm start
+# اختبار سريع — دورة كل 5 دقائق
+INTERVAL_MS=300000 npm start
+
+# نموذج بديل
+MODEL=llama3.1:latest npm start
 ```
 
-## خيار احتياطي: نفق SSH
+## دورة التطور (v2 — ثنائية المراحل)
 
-إذا لم يكن Ollama مفتوحاً على الشبكة، يمكنك فتح نفق يدوياً:
-
-```bash
-ssh -L 11434:localhost:11434 ai-lap@10.162.46.208
+```mermaid
+flowchart TD
+  Read["readBody + readState"] --> Plan["Phase 1: تخطيط JSON"]
+  Plan --> Build["Phase 2: بناء HTML كامل"]
+  Build --> Validate["validateQuality"]
+  Validate -->|"نجح"| Write["mutateBody + updateState"]
+  Validate -->|"فشل"| Retry["إعادة محاولة مرة"]
+  Retry --> Build
+  Write --> Push["git push → Netlify"]
 ```
 
-ثم شغّل الوكيل مع:
+1. **Phase 1 — التخطيط:** deepseek-r1 يُخرج JSON (فلسفة، ألوان، عناصر UI، تفاعل)
+2. **Phase 2 — البناء:** يبني HTML كوني/سايبر كامل من الخطة
+3. **validateQuality:** يرفض المخرجات الضعيفة (نص عربي قليل، CSS مكرر، بدون حركة...)
+4. **إعادة محاولة:** محاولة ثانية بتحذير إذا رُفضت الجودة
+5. **updateState:** تحديث `state.json` (الجيل، التأمل، الخطة)
+6. **pushToNetwork:** رفع إلى GitHub → Netlify
 
-```bash
-OLLAMA_URL=http://localhost:11434/api/generate npm start
-```
+## فحص الجودة (Quality Gate)
+
+يرفض HTML قبل الكتابة إذا:
+
+- أقل من 2000 حرف أو أكثر من 50000
+- نص عربي أقل من 100 حرف
+- أقل من 5 قواعد CSS
+- بدون animation أو canvas أو requestAnimationFrame
+- تكرار class name 3+ مرات
+- تشابه > 90% مع HTML الحالي
+- فقرات فارغة
 
 ## الحمايات (Failsafes)
 
-- الوكيل يعدّل **فقط** ملفات داخل `public/` — لا يلمس `agent.js` أبداً
-- `try/catch` قوي حول كل دورة — الفشل لا يوقف الوكيل
-- تنظيف رد Ollama من أسوار Markdown (` ```html `)
-- رفض الردود الفارغة أو غير الصالحة
-- تخطي `git push` إذا لم يكن هناك تغيير فعلي
+- الكتابة **فقط** داخل `public/` — لا يلمس `agent.js`
+- `isEvolving` lock يمنع تداخل الدورات
+- `try/catch` قوي — الفشل لا يوقف الوكيل
+- تنظيف ردود deepseek (إزالة `` و Markdown)
+- تخطي `git push` إذا لا تغييرات
 
-## دورة التطور
+## خيار احتياطي: نفق SSH
 
-1. `readBody()` — قراءة `public/index.html`
-2. `reflectAndEvolve()` — إرسال الكود إلى Ollama للتأمل
-3. `cleanHTML()` — تنظيف واستخراج HTML صافٍ
-4. `mutateBody()` — كتابة الكود الجديد في `public/`
-5. `pushToNetwork()` — `git add` → `git commit` → `git push`
-6. Netlify ينشر التحديث تلقائياً
+```bash
+ssh -L 11434:localhost:11434 ai-lap@10.162.46.208
+OLLAMA_URL=http://localhost:11434/api/chat npm start
+```
 
 ## النشر على Netlify
 
-1. اربط مستودع `accelerator007/AI` في Netlify
+1. اربط مستودع `accelerator007/AI`
 2. `netlify.toml` يحدد `publish = "public"`
-3. كل `git push` يُطلق نشراً جديداً تلقائياً
+3. كل `git push` يُطلق نشراً جديداً
