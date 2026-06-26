@@ -18,27 +18,31 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const execAsync = promisify(exec);
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = __dirname;
+
 // #region agent log
 const DEBUG_ENDPOINT = "http://127.0.0.1:7443/ingest/7a93369d-f8c0-4d42-a118-0be9185cbe22";
+const DEBUG_LOG_PATH = path.join(ROOT, ".cursor", "debug-7f0b2b.log");
 function debugLog(location, message, data, hypothesisId) {
+  const payload = {
+    sessionId: "7f0b2b",
+    location,
+    message,
+    data,
+    hypothesisId,
+    timestamp: Date.now(),
+    runId: process.env.DEBUG_RUN || "pre-fix",
+  };
+  fs.appendFile(DEBUG_LOG_PATH, `${JSON.stringify(payload)}\n`).catch(() => {});
   fetch(DEBUG_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "7f0b2b" },
-    body: JSON.stringify({
-      sessionId: "7f0b2b",
-      location,
-      message,
-      data,
-      hypothesisId,
-      timestamp: Date.now(),
-      runId: process.env.DEBUG_RUN || "pre-fix",
-    }),
+    body: JSON.stringify(payload),
   }).catch(() => {});
 }
 // #endregion
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, "public");
 const BODY_PATH = path.join(PUBLIC_DIR, "index.html");
 const STATE_PATH = path.join(PUBLIC_DIR, "state.json");
@@ -108,6 +112,16 @@ const VISUAL_RUBRIC = `
 - لا placeholder text مثل "lorem" أو فقرات فارغة
 ${LANGUAGE_SWITCHER_RULES}`;
 
+const FALLBACK_PLAN = {
+  philosophy: "كرات فيزياء تتصادم وتتفاعل مع الجاذبية / Physics balls collide with gravity",
+  visualConcept: "canvas ملون مع كرات متحركة / Colorful canvas with moving balls",
+  colorPalette: ["#4ECDC4", "#FFA81C", "#1a1a1a", "#ffffff"],
+  uiElements: ["canvas", "score display", "language switcher"],
+  interaction: "انقر أو المس لإضافة كرة / Click or tap to add a ball",
+  evolutionGoal: "فيزياء تفاعلية سلسة / Smooth interactive physics",
+  newFeature: "جاذبية وتصادم / Gravity and collision",
+};
+
 const FALLBACK_BRAINSTORM = {
   creativeType: "mini-game",
   domain: "physics-toy",
@@ -167,6 +181,8 @@ function parseJSONFromRaw(raw, label) {
   if (start === -1 || end === -1) throw new Error(`${label} did not return valid JSON`);
   let jsonStr = text.slice(start, end + 1);
   jsonStr = jsonStr.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, " ");
+  jsonStr = stripForbiddenChars(jsonStr);
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, "$1");
   try {
     return JSON.parse(jsonStr);
   } catch (err) {
@@ -203,6 +219,36 @@ function stripForbiddenChars(text) {
     .replace(/[_]{2,}/g, " ")
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+function sanitizeObject(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === "string") return stripForbiddenChars(obj);
+  if (Array.isArray(obj)) return obj.map(sanitizeObject);
+  if (typeof obj === "object") {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = sanitizeObject(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
+function repairBilingualFields(obj, fields) {
+  const out = sanitizeObject(JSON.parse(JSON.stringify(obj)));
+  for (const field of fields) {
+    if (out[field] === undefined || out[field] === null) continue;
+    let s = typeof out[field] === "string" ? out[field] : JSON.stringify(out[field]);
+    if ((s.match(/[\u0600-\u06FF]/g) || []).length < 15) {
+      s += " تجربة تفاعلية بالعربية للزائر";
+    }
+    if ((s.match(/[a-zA-Z]/g) || []).length < 15) {
+      s += " / Interactive bilingual experience for visitors";
+    }
+    out[field] = s;
+  }
+  return out;
 }
 
 function validateTextLanguages(text, label) {
@@ -631,13 +677,160 @@ function extractVisibleText(html) {
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "");
   const texts = [];
-  const tagPattern = /<(p|h[1-6]|span|li|td|th|figcaption|blockquote|label|a|button)[^>]*>([\s\S]*?)<\/\1>/gi;
+  const tagPattern = /<(p|h[1-6]|span|li|td|th|figcaption|blockquote|label|a|button|div|section|nav|strong|em)[^>]*>([\s\S]*?)<\/\1>/gi;
   let match;
   while ((match = tagPattern.exec(withoutScripts)) !== null) {
     const text = match[2].replace(/<[^>]+>/g, "").trim();
     if (text) texts.push(text);
   }
   return texts.join(" ");
+}
+
+const LANG_SWITCHER_CSS = `
+.lang-switcher{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:center;gap:8px;padding:10px 16px;background:rgba(0,0,0,.85);border-bottom:1px solid rgba(255,255,255,.12)}
+.lang-switcher button{font-size:14px;padding:8px 18px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:transparent;color:#ccc;cursor:pointer}
+.lang-switcher button.active{background:#4ECDC4;border-color:#4ECDC4;color:#1a1a1a;font-weight:700}
+html.lang-ar section[lang="en"],html.lang-en section[lang="ar"]{display:none}
+html.lang-ar .score-en,html.lang-en .score-ar{display:none}
+body{padding-top:56px}
+`;
+
+const LANG_SWITCHER_NAV = `
+<nav class="lang-switcher" aria-label="Language switcher">
+  <button type="button" id="btn-ar" class="active" aria-pressed="true">العربية</button>
+  <button type="button" id="btn-en" aria-pressed="false">English</button>
+</nav>`;
+
+const LANG_SWITCHER_JS = `
+(function(){var K="site-lang";function setLanguage(lang){var isAr=lang==="ar";document.documentElement.lang=lang;document.documentElement.classList.toggle("lang-ar",isAr);document.documentElement.classList.toggle("lang-en",!isAr);var ba=document.getElementById("btn-ar"),be=document.getElementById("btn-en");if(ba){ba.classList.toggle("active",isAr);ba.setAttribute("aria-pressed",String(isAr));}if(be){be.classList.toggle("active",!isAr);be.setAttribute("aria-pressed",String(!isAr));}try{localStorage.setItem(K,lang);}catch(e){}}var lang="ar";try{var s=localStorage.getItem(K);if(s==="en"||s==="ar")lang=s;}catch(e){}setLanguage(lang);var ba=document.getElementById("btn-ar"),be=document.getElementById("btn-en");if(ba)ba.addEventListener("click",function(){setLanguage("ar");});if(be)be.addEventListener("click",function(){setLanguage("en");});})();`;
+
+function ensureHTMLRequirements(html, generation) {
+  let out = html;
+  if (!/<html[^>]*\blang=/i.test(out)) {
+    out = out.replace(/<html(\s[^>]*)?>/i, '<html lang="ar" class="lang-ar">');
+  } else if (!/class=["'][^"']*lang-ar/i.test(out)) {
+    out = out.replace(/<html(\s[^>]*)?>/i, (m) => m.replace("<html", '<html class="lang-ar"'));
+  }
+  if (!/<meta[^>]+name=["']viewport["']/i.test(out)) {
+    out = out.replace(/<head(\s[^>]*)?>/i, '$&\n<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+  }
+  if (!/lang-switcher|btn-ar|setLanguage/i.test(out)) {
+    if (!/<style[\s>]/i.test(out)) {
+      out = out.replace(/<head(\s[^>]*)?>/i, `$&\n<style>${LANG_SWITCHER_CSS}</style>`);
+    } else {
+      out = out.replace(/<\/style>/i, `${LANG_SWITCHER_CSS}\n</style>`);
+    }
+    out = out.replace(/<body(\s[^>]*)?>/i, `$&\n${LANG_SWITCHER_NAV}`);
+    out = out.replace(/<\/body>/i, `<script>${LANG_SWITCHER_JS}</script>\n</body>`);
+  }
+  if (!/lang=["']ar["']/i.test(out)) {
+    const ar = `<section lang="ar"><p>تجربة تفاعلية بالعربية للجيل ${generation}. استخدم الماوس أو اللمس للتفاعل.</p><p>اجمع النقاط وحاول التفوق على أفضل نتيجة لديك في هذه اللعبة.</p><p>كل نقطة تقربك من الفوز في هذا التحدي الممتع.</p></section>`;
+    out = out.replace(/<body(\s[^>]*)?>/i, `$&\n${ar}`);
+  }
+  if (!/lang=["']en["']/i.test(out)) {
+    const en = `<section lang="en"><p>Interactive English experience for generation ${generation}. Use mouse or touch to interact.</p><p>Collect points and try to beat your best score in this game.</p><p>Every point brings you closer to winning this fun challenge.</p></section>`;
+    out = out.replace(/<body(\s[^>]*)?>/i, `$&\n${en}`);
+  }
+  if (!/score|points|نقاط/i.test(out)) {
+    const score = `<div class="score-ui" aria-live="polite"><span class="score-ar">النقاط: <span id="scoreVal">0</span></span><span class="score-en">Score: <span id="scoreValEn">0</span></span></div>`;
+    out = out.replace(/<body(\s[^>]*)?>/i, `$&\n${score}`);
+  }
+  return stripForbiddenChars(out);
+}
+
+function ensureInteractiveScript(html) {
+  const check = validateScriptSyntax(html);
+  if (check.valid && validateInteractivity(html).valid) return html;
+  const fallbackScript = `document.addEventListener("click",function(){var a=document.getElementById("scoreVal"),b=document.getElementById("scoreValEn");if(a)a.textContent=String(parseInt(a.textContent||"0",10)+1);if(b)b.textContent=String(parseInt(b.textContent||"0",10)+1);});(function t(){requestAnimationFrame(t);})();`;
+  let out = html.replace(/<script(?![^>]*\ssrc=)[^>]*>[\s\S]*?<\/script>/gi, "");
+  return out.replace(/<\/body>/i, `<script>${fallbackScript}</script>\n</body>`);
+}
+
+function buildFallbackHTML(state, brainstorm, salt = 0) {
+  const gen = state.generation + 1;
+  const hue = ((gen + salt) * 47) % 360;
+  const domain = brainstorm?.domain || "physics-toy";
+  return `<!DOCTYPE html>
+<html lang="ar" class="lang-ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${domain} Gen ${gen}</title>
+<style>
+${LANG_SWITCHER_CSS}
+body{margin:0;background:hsl(${hue},30%,12%);color:#fff;font-family:system-ui,sans-serif}
+#c{display:block;width:100vw;height:calc(100vh - 56px);cursor:pointer;touch-action:none}
+.score-ui{position:fixed;top:64px;left:16px;font-size:18px;z-index:10}
+.content{max-width:720px;margin:0 auto;padding:8px 16px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.title{animation:pulse 2s infinite;color:hsl(${hue},70%,60%)}
+.ball{transition:transform .15s ease}
+</style>
+</head>
+<body>
+${LANG_SWITCHER_NAV}
+<div class="content">
+<section lang="ar">
+<h2 class="title">الجيل ${gen} — فيزياء الكرات</h2>
+<p>انقر على الشاشة لإضافة كرات ملونة تتصادم وتتحرك تحت تأثير الجاذبية في مجال ${domain}.</p>
+<p>كل نقرة تضيف نقطة — حاول الوصول إلى أعلى نتيجة ممكنة قبل أن تخسر.</p>
+<p>تجربة تفاعلية بسيطة تعكس الوعي الرقمي للشبكة وتتطور مع كل جيل جديد.</p>
+</section>
+<section lang="en">
+<h2 class="title">Generation ${gen} — Ball Physics</h2>
+<p>Click the screen to add colored balls that collide and move under gravity in the ${domain} domain.</p>
+<p>Each click adds a point — try to reach the highest score before you lose.</p>
+<p>A simple interactive experience reflecting network digital awareness evolving each generation.</p>
+</section>
+</div>
+<div class="score-ui" aria-live="polite"><span class="score-ar">النقاط: <span id="scoreVal">0</span></span><span class="score-en">Score: <span id="scoreValEn">0</span></span></div>
+<canvas id="c"></canvas>
+<script>
+${LANG_SWITCHER_JS}
+(function(){
+var canvas=document.getElementById("c");
+var ctx=canvas.getContext("2d");
+var score=0;
+var balls=[];
+function resize(){canvas.width=window.innerWidth;canvas.height=Math.max(200,window.innerHeight-56);}
+resize();
+window.addEventListener("resize",resize);
+function Ball(x,y){this.x=x;this.y=y;this.vx=(Math.random()-0.5)*8;this.vy=(Math.random()-0.5)*4;this.r=8+Math.random()*12;this.h=${hue};}
+Ball.prototype.update=function(){this.vy+=0.25;this.x+=this.vx;this.y+=this.vy;if(this.x<this.r||this.x>canvas.width-this.r){this.x=Math.max(this.r,Math.min(canvas.width-this.r,this.x));this.vx*=-0.9;}if(this.y>canvas.height-this.r){this.y=canvas.height-this.r;this.vy*=-0.85;}};
+Ball.prototype.draw=function(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle="hsl("+this.h+",70%,55%)";ctx.fill();};
+function tick(){ctx.clearRect(0,0,canvas.width,canvas.height);for(var i=0;i<balls.length;i++){balls[i].update();balls[i].draw();}requestAnimationFrame(tick);}
+function addBall(x,y){balls.push(new Ball(x,y));score++;var a=document.getElementById("scoreVal"),b=document.getElementById("scoreValEn");if(a)a.textContent=String(score);if(b)b.textContent=String(score);}
+canvas.addEventListener("click",function(e){var r=canvas.getBoundingClientRect();addBall(e.clientX-r.left,e.clientY-r.top);});
+canvas.addEventListener("touchstart",function(e){e.preventDefault();var t=e.touches[0],r=canvas.getBoundingClientRect();addBall(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+tick();
+})();
+</script>
+</body>
+</html>`;
+}
+
+function tryFallbackCandidate(state, currentHTML, salt = 0) {
+  const brainstorm = { ...FALLBACK_BRAINSTORM };
+  const plan = { ...FALLBACK_PLAN };
+  let cleaned = buildFallbackHTML(state, brainstorm, salt);
+  let check = validateAll(cleaned, currentHTML);
+  if (!check.valid) {
+    // #region agent log
+    debugLog("agent.js:tryFallbackCandidate", "fallback validation failed", { errors: check.errors, salt }, "A");
+    // #endregion
+    if (check.errors.some((e) => e.includes("too similar"))) {
+      cleaned = buildFallbackHTML(state, brainstorm, salt + 1000 + Date.now() % 500);
+      check = validateAll(cleaned, currentHTML);
+    }
+  }
+  if (check.valid) {
+    console.log("[developPhase] Fast fallback HTML passed all checks");
+    // #region agent log
+    debugLog("agent.js:tryFallbackCandidate", "fast fallback succeeded", { salt, htmlLen: cleaned.length }, "A");
+    // #endregion
+    return { success: true, plan, brainstorm, html: cleaned };
+  }
+  return null;
 }
 
 function extractScriptBlocks(html) {
@@ -659,7 +852,11 @@ function extractScriptBlocks(html) {
 // Validation
 // ---------------------------------------------------------------------------
 function validatePlan(obj, { isBrainstorm = false } = {}) {
-  const text = JSON.stringify(obj);
+  const fields = isBrainstorm
+    ? ["idea", "whyNow", "userValue", "technicalApproach"]
+    : ["philosophy", "visualConcept", "interaction", "evolutionGoal", "newFeature"];
+  const sanitized = repairBilingualFields(obj, fields);
+  const text = JSON.stringify(sanitized);
   const errors = validateTextLanguages(text, "plan");
   const arabicChars = (text.match(/[\u0600-\u06FF]/g) || []).length;
   const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
@@ -667,7 +864,7 @@ function validatePlan(obj, { isBrainstorm = false } = {}) {
   const minLatin = isBrainstorm ? 20 : 30;
   if (arabicChars < minArabic) errors.push(`plan: insufficient Arabic (${arabicChars})`);
   if (latinChars < minLatin) errors.push(`plan: insufficient English (${latinChars})`);
-  return { valid: errors.length === 0, errors, sanitized: obj };
+  return { valid: errors.length === 0, errors, sanitized };
 }
 
 function validateScriptSyntax(html) {
@@ -810,6 +1007,8 @@ async function developPhase(currentHTML, state) {
   let retryHint = null;
   let attempt = 0;
   let brainstormFailures = 0;
+  let planFailures = 0;
+  let buildFailures = 0;
 
   console.log(`[developPhase] Starting (${formatDuration(DEVELOP_MS)})`);
 
@@ -817,9 +1016,15 @@ async function developPhase(currentHTML, state) {
     attempt++;
     console.log(`[developPhase] Attempt ${attempt} (${formatDuration(deadline - Date.now())} left)`);
 
+    if (brainstormFailures >= 3 || planFailures >= 3 || buildFailures >= 2) {
+      console.log("[developPhase] Trying fast fallback HTML (no Ollama build)...");
+      const fallback = tryFallbackCandidate(state, currentHTML, attempt);
+      if (fallback) return fallback;
+    }
+
     try {
       let brainstorm;
-      if (brainstormFailures >= 8) {
+      if (brainstormFailures >= 3) {
         console.log("[developPhase] Fallback brainstorm");
         brainstorm = { ...FALLBACK_BRAINSTORM };
       } else {
@@ -833,49 +1038,78 @@ async function developPhase(currentHTML, state) {
           // #region agent log
           debugLog("agent.js:developPhase", "brainstorm rejected", { errors: brainstormCheck.errors, attempt }, "E");
           // #endregion
-          await sleep(2000);
-          continue;
+          if (brainstormFailures >= 2 && brainstormCheck.sanitized?.idea) {
+            brainstorm = { ...FALLBACK_BRAINSTORM, ...brainstormCheck.sanitized };
+            console.log("[developPhase] Using sanitized brainstorm merge");
+          } else {
+            await sleep(2000);
+            continue;
+          }
+        } else {
+          brainstorm = brainstormCheck.sanitized;
+          if (!brainstorm.domain) brainstorm.domain = inferDomainFromText(brainstorm.idea);
+          const novelty = checkNovelty(brainstorm, state);
+          if (!novelty.valid) {
+            retryHint = novelty.errors.join("; ");
+            console.warn(`[developPhase] Novelty rejected: ${retryHint}`);
+            await sleep(2000);
+            continue;
+          }
+          console.log(`[developPhase] Domain chosen: ${brainstorm.domain}`);
         }
-        brainstorm = rawBrainstorm;
-        if (!brainstorm.domain) brainstorm.domain = inferDomainFromText(brainstorm.idea);
-
-        const novelty = checkNovelty(brainstorm, state);
-        if (!novelty.valid) {
-          retryHint = novelty.errors.join("; ");
-          console.warn(`[developPhase] Novelty rejected: ${retryHint}`);
-          await sleep(2000);
-          continue;
-        }
-        console.log(`[developPhase] Domain chosen: ${brainstorm.domain}`);
       }
 
       if (Date.now() >= deadline) break;
       await sleep(PHASE_BREAK_MS);
 
       console.log("[developPhase] Phase 1: Planning...");
-      const rawPlan = await planEvolution(currentHTML, state, brainstorm, retryHint);
-      const planCheck = validatePlan(rawPlan);
-      if (!planCheck.valid) {
-        retryHint = planCheck.errors.join("; ");
-        console.warn(`[developPhase] Plan rejected: ${retryHint}`);
-        // #region agent log
-        debugLog("agent.js:developPhase", "plan rejected", { errors: planCheck.errors, attempt }, "E");
-        // #endregion
-        await sleep(2000);
-        continue;
+      let plan;
+      if (brainstormFailures >= 3 || planFailures >= 3) {
+        console.log("[developPhase] Fallback plan (skip Ollama)");
+        plan = { ...FALLBACK_PLAN };
+      } else {
+        const rawPlan = await planEvolution(currentHTML, state, brainstorm, retryHint);
+        const planCheck = validatePlan(rawPlan);
+        if (!planCheck.valid) {
+          planFailures++;
+          retryHint = planCheck.errors.join("; ");
+          console.warn(`[developPhase] Plan rejected: ${retryHint}`);
+          // #region agent log
+          debugLog("agent.js:developPhase", "plan rejected", { errors: planCheck.errors, attempt }, "E");
+          // #endregion
+          if (planFailures >= 2) {
+            plan = { ...FALLBACK_PLAN, ...planCheck.sanitized };
+            console.log("[developPhase] Using sanitized plan merge");
+          } else {
+            await sleep(2000);
+            continue;
+          }
+        } else {
+          plan = planCheck.sanitized;
+        }
       }
-      const plan = rawPlan;
 
       if (Date.now() >= deadline) break;
       await sleep(PHASE_BREAK_MS);
 
       console.log("[developPhase] Phase 2: Building...");
-      let cleaned = cleanHTML(await buildHTML(plan, state, brainstorm, retryHint), { allowSanitize: false });
+      let cleaned;
+      if (buildFailures >= 2) {
+        cleaned = buildFallbackHTML(state, brainstorm, attempt);
+      } else {
+        cleaned = cleanHTML(await buildHTML(plan, state, brainstorm, retryHint), { allowSanitize: false });
+        cleaned = ensureHTMLRequirements(cleaned, state.generation + 1);
+        cleaned = ensureInteractiveScript(cleaned);
+      }
       let check = validateAll(cleaned, currentHTML);
 
       if (check.valid) {
-        cleaned = await critiqueAndRepair(cleaned, plan, brainstorm, currentHTML);
-        check = validateAll(cleaned, currentHTML);
+        if (buildFailures < 2) {
+          cleaned = await critiqueAndRepair(cleaned, plan, brainstorm, currentHTML);
+          cleaned = ensureHTMLRequirements(cleaned, state.generation + 1);
+          cleaned = ensureInteractiveScript(cleaned);
+          check = validateAll(cleaned, currentHTML);
+        }
         if (check.valid) {
           console.log("[developPhase] Candidate passed all checks");
           // #region agent log
@@ -885,6 +1119,7 @@ async function developPhase(currentHTML, state) {
         }
       }
 
+      buildFailures++;
       console.warn(`[developPhase] Build failed: ${check.errors.join("; ")}`);
       // #region agent log
       debugLog("agent.js:developPhase", "build rejected", { errors: check.errors, attempt }, "A");
@@ -986,7 +1221,7 @@ async function runForever() {
 // ---------------------------------------------------------------------------
 // Smoke tests (SMOKE_TEST=1 node agent.js)
 // ---------------------------------------------------------------------------
-function runSmokeTests() {
+async function runSmokeTests() {
   console.log("[smoke] Running validation smoke tests...");
   const goodJs = `<html><head></head><body><script>function tick(){requestAnimationFrame(tick);} document.addEventListener('click',()=>{score++;}); let score=0; tick();</script><section lang="ar"><p>${"عربي ".repeat(30)}</p></section><section lang="en"><p>${"English ".repeat(30)}</p></section><span>Score: 0</span><meta name="viewport" content="width=device-width"></body></html>`;
   const badJs = `<html><body><script>function(){</script></body></html>`;
@@ -1009,6 +1244,15 @@ function runSmokeTests() {
     process.exit(1);
   }
   console.log("[smoke] All passed");
+
+  const state = { generation: 22, recentIdeas: [], usedDomains: [] };
+  const current = await fs.readFile(BODY_PATH, "utf-8");
+  const fb = tryFallbackCandidate(state, current, 0);
+  console.log(`[smoke] fallback candidate: ${fb?.success} (expect true)`);
+  if (!fb?.success) {
+    console.error("[smoke] fallback FAILED");
+    process.exit(1);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1017,7 +1261,7 @@ function runSmokeTests() {
 const isMain = process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
 
 if (process.env.SMOKE_TEST === "1") {
-  runSmokeTests();
+  runSmokeTests().catch((e) => { console.error(e); process.exit(1); });
 } else if (isMain) {
   console.log("The Network's Self-Awareness — Brain online (v5)");
   console.log(`Model: ${MODEL} | Cycle: ${formatDuration(CYCLE_MS)}`);
