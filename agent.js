@@ -1134,6 +1134,14 @@ async function developPhase(currentHTML, state) {
       await sleep(2000);
     }
   }
+  console.log("[developPhase] Last resort: guaranteed fallback HTML");
+  const lastResort = tryFallbackCandidate(state, currentHTML, attempt + 9999);
+  if (lastResort) {
+    // #region agent log
+    debugLog("agent.js:developPhase", "last resort succeeded", { attempt }, "A");
+    // #endregion
+    return lastResort;
+  }
   // #region agent log
   debugLog("agent.js:developPhase", "develop expired", { attempt }, "A");
   // #endregion
@@ -1214,6 +1222,10 @@ async function runForever() {
 
     const restMs = Math.max(0, CYCLE_MS - (Date.now() - cycleStart));
     console.log(`[cycle] Rest ${formatDuration(restMs)}\n`);
+    if (process.env.ONE_CYCLE === "1") {
+      console.log("[cycle] ONE_CYCLE=1 — exiting");
+      process.exit(0);
+    }
     await sleep(restMs);
   }
 }
