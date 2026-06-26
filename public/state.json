@@ -1,12 +1,15 @@
 {
-  "generation": 19,
+  "generation": 20,
   "theme": "cosmic",
-  "lastReflection": "#تأمل عربي عن الفكرة#",
-  "lastPlan": "{\n  \"philosophy\": \"#تأمل عربي عن الفكرة#\",\n  \"philosophyEn\": \"#English reflection#\",\n  \"visualConcept\": \"#وصف بصري AR / EN#\",\n  \"colorPalette\": [\n    \"#1a1a1a\",\n    \"#64ffda\",\n    \"#ffffff\"\n  ],\n  \"uiElements\": [\n    \"قماشة رقمية/Interactive Canvas\",\n    \"أزرار التحكم/Control Buttons\",\n    \"متصفح النتائج/Results Browser\"\n  ],\n  \"interaction\": \"#كيف يتفاعل المستخدم / How user interacts#\",\n  \"typography\": [\n    \"'Noto Sans Arabic', sans-serif\",\n    \"'Orbitron', sans-serif\"\n  ],\n  \"evolutionGoal\": \"#ما الجديد والأفضل عن الجيل السابق / What's better than before#\",\n  \"keepFromPrevious\": \"#ما نحتفظ به من HTML الحالي#\",\n  \"newFeature\": \"#الميزة الجديدة هذه الدورة#\"\n}",
+  "lastReflection": {
+    "lang": "ar",
+    "content": "القصة ليست مجرد سلسلة من الأحداث، بل هي تجربة شخصية يمكن للمستخدم أن ي moldsها وفقًا لرغباته. من خلال التفاعل مع العناصر المختلفة للحكاية، يصبح المستخدم جزءًا من التجربةRather than just observing."
+  },
+  "lastPlan": "{\n  \"philosophy\": {\n    \"lang\": \"ar\",\n    \"content\": \"القصة ليست مجرد سلسلة من الأحداث، بل هي تجربة شخصية يمكن للمستخدم أن ي moldsها وفقًا لرغباته. من خلال التفاعل مع العناصر المختلفة للحكاية، يصبح المستخدم جزءًا من التجربةRather than just observing.\"\n  },\n  \"philosophyEn\": {\n    \"lang\": \"en\",\n    \"content\": \"A story is not just a series of events, but a personal journey that the user can shape according to their desires. By interacting with the different elements of the narrative, the user becomes an integral part of the experience rather than just an observer.\"\n  },\n  \"visualConcept\": {\n    \"lang\": \"ar,en\",\n    \"content\": \"experience will feature an interactive canvas where users can draw or swipe to create sounds and influence the story. The visual design will include colorful brushstrokes, animated sound waves, and dynamic text elements that respond to user interactions.\"\n  },\n  \"colorPalette\": [\n    \"#2196F3\",\n    \"#FFD700\",\n    \"#8BC34A\"\n  ],\n  \"uiElements\": [\n    {\n      \"element\": \"Canvas for interactive drawing/swiping\",\n      \"lang\": \"ar,en\"\n    },\n    {\n      \"element\": \"Color picker for sound customization\",\n      \"lang\": \"ar,en\"\n    },\n    {\n      \"element\": \"Sound wave visualization\",\n      \"lang\": \"ar,en\"\n    },\n    {\n      \"element\": \"Progress indicator for story advancement\",\n      \"lang\": \"ar,en\"\n    }\n  ],\n  \"interaction\": {\n    \"lang\": \"ar,en\",\n    \"content\": \"Users can draw or swipe on the canvas to create sounds and influence the story. They can also choose colors and sounds for different actions, making the experience highly customizable.\"\n  },\n  \"typography\": {\n    \"arabicFont\": \"Noto Sans Arabic\",\n    \"englishFont\": \"Orbitron\"\n  },\n  \"evolutionGoal\": {\n    \"lang\": \"ar,en\",\n    \"content\": \"To create a more immersive and personalized story experience where users can influence the narrative direction through their actions, making it unique for each user.\"\n  },\n  \"keepFromPrevious\": {\n    \"lang\": \"ar,en\",\n    \"content\": \"We will retain the canvas element, color picker, sound controls, and overall container structure from the previous HTML version to ensure a smooth transition and maintain functionality.\"\n  },\n  \"newFeature\": {\n    \"lang\": \"ar,en\",\n    \"content\": \"The addition of a branching storyline where user actions directly impact the narrative direction, creating multiple possible endings based on their choices.\"\n  }\n}",
   "lastFailure": null,
   "lastCycleDuration": {
-    "develop": 134085,
-    "verify": 26166,
+    "develop": 89739,
+    "verify": 4539,
     "rest": 0
   },
   "creativeHistory": [
@@ -135,12 +138,22 @@
       "type": "mini-game",
       "feature": "HTML5 Canvas, Web Audio API, Mouse/Touch interactions",
       "summary": "لعبة موسيقية تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى باستخدام أداة رسم وتفاعل سمعي، ورؤية التأثيرات السمعية والمرئية في الوقت الحقيقي."
+    },
+    {
+      "generation": 20,
+      "type": "visual-experience",
+      "feature": "Canvas, Web Audio API, JavaScript",
+      "summary": "تجربة بصرية قابلة للتعديل حيث يقوم المستخدم باختيار العناصر التي ت القصة، مما يجعله جزءًا من الحبكة. تستخدم تقنيات HTML5 Canvas و Web Audio API لإنشاء عالم رقمي متفاعل مع أصوات وأحداث تتغير بناءً على قرارات המשתמש."
     }
   ],
   "usedCreativeTypes": [
     "mini-game",
     "simulation",
-    "interactive-tool"
+    "interactive-tool",
+    "visual-experience"
   ],
-  "improvementGoal": "#ما الجديد والأفضل عن الجيل السابق / What's better than before#"
+  "improvementGoal": {
+    "lang": "ar,en",
+    "content": "To create a more immersive and personalized story experience where users can influence the narrative direction through their actions, making it unique for each user."
+  }
 }
