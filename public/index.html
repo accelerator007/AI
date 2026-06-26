@@ -1,69 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" class="lang-ar">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>physics-toy Gen 23</title>
-<style>
-
-.lang-switcher{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:center;gap:8px;padding:10px 16px;background:rgba(0,0,0,.85);border-bottom:1px solid rgba(255,255,255,.12)}
-.lang-switcher button{font-size:14px;padding:8px 18px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:transparent;color:#ccc;cursor:pointer}
-.lang-switcher button.active{background:#4ECDC4;border-color:#4ECDC4;color:#1a1a1a;font-weight:700}
-html.lang-ar section[lang="en"],html.lang-en section[lang="ar"]{display:none}
-html.lang-ar .score-en,html.lang-en .score-ar{display:none}
-body{padding-top:56px}
-
-body{margin:0;background:hsl(201,30%,12%);color:#fff;font-family:system-ui,sans-serif}
-#c{display:block;width:100vw;height:calc(100vh - 56px);cursor:pointer;touch-action:none}
-.score-ui{position:fixed;top:64px;left:16px;font-size:18px;z-index:10}
-.content{max-width:720px;margin:0 auto;padding:8px 16px}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-.title{animation:pulse 2s infinite;color:hsl(201,70%,60%)}
-.ball{transition:transform .15s ease}
-</style>
+<head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Generative Art Experience</title> <style> * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; } body { background-color: #1a1a1a; color: #ffffff; line-height: 1.6; min-height: 100vh; } .header { position: fixed; top: 0; width: 100%; background-color: rgba(0, 0, 0, 0.8); padding: 1rem; z-index: 1000; } .lang-switcher { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; justify-content: center; gap: 8px; padding: 10px 16px; background: rgba(0, 0, 0, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.12); } .lang-switcher button { font-size: 14px; padding: 8px 18px; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 999px; background: transparent; color: #ccc; cursor: pointer; } .lang-switcher button.active { background: #4ECDC4; border-color: #4ECDC4; color: #1a1a1a; font-weight: 700; } html.lang-ar section[lang="en"], html.lang-en section[lang="ar"] { display: none; } html.lang-ar .score-en, html.lang-en .score-ar { display: none; } body { padding-top: 56px; } .info-section { max-width: 1200px; margin: 4rem auto; padding: 0 1rem; } canvas { border: 2px solid #333; background-color: #222; touch-action: none; display: block; margin: 2rem auto; } </style>
 </head>
-<body>
-
-<nav class="lang-switcher" aria-label="Language switcher">
-  <button type="button" id="btn-ar" class="active" aria-pressed="true">العربية</button>
-  <button type="button" id="btn-en" aria-pressed="false">English</button>
-</nav>
-<div class="content">
-<section lang="ar">
-<h2 class="title">الجيل 23 — فيزياء الكرات</h2>
-<p>انقر على الشاشة لإضافة كرات ملونة تتصادم وتتحرك تحت تأثير الجاذبية في مجال physics-toy.</p>
-<p>كل نقرة تضيف نقطة — حاول الوصول إلى أعلى نتيجة ممكنة قبل أن تخسر.</p>
-<p>تجربة تفاعلية بسيطة تعكس الوعي الرقمي للشبكة وتتطور مع كل جيل جديد.</p>
-</section>
-<section lang="en">
-<h2 class="title">Generation 23 — Ball Physics</h2>
-<p>Click the screen to add colored balls that collide and move under gravity in the physics-toy domain.</p>
-<p>Each click adds a point — try to reach the highest score before you lose.</p>
-<p>A simple interactive experience reflecting network digital awareness evolving each generation.</p>
-</section>
-</div>
-<div class="score-ui" aria-live="polite"><span class="score-ar">النقاط: <span id="scoreVal">0</span></span><span class="score-en">Score: <span id="scoreValEn">0</span></span></div>
-<canvas id="c"></canvas>
-<script>
-
-(function(){var K="site-lang";function setLanguage(lang){var isAr=lang==="ar";document.documentElement.lang=lang;document.documentElement.classList.toggle("lang-ar",isAr);document.documentElement.classList.toggle("lang-en",!isAr);var ba=document.getElementById("btn-ar"),be=document.getElementById("btn-en");if(ba){ba.classList.toggle("active",isAr);ba.setAttribute("aria-pressed",String(isAr));}if(be){be.classList.toggle("active",!isAr);be.setAttribute("aria-pressed",String(!isAr));}try{localStorage.setItem(K,lang);}catch(e){}}var lang="ar";try{var s=localStorage.getItem(K);if(s==="en"||s==="ar")lang=s;}catch(e){}setLanguage(lang);var ba=document.getElementById("btn-ar"),be=document.getElementById("btn-en");if(ba)ba.addEventListener("click",function(){setLanguage("ar");});if(be)be.addEventListener("click",function(){setLanguage("en");});})();
-(function(){
-var canvas=document.getElementById("c");
-var ctx=canvas.getContext("2d");
-var score=0;
-var balls=[];
-function resize(){canvas.width=window.innerWidth;canvas.height=Math.max(200,window.innerHeight-56);}
-resize();
-window.addEventListener("resize",resize);
-function Ball(x,y){this.x=x;this.y=y;this.vx=(Math.random()-0.5)*8;this.vy=(Math.random()-0.5)*4;this.r=8+Math.random()*12;this.h=201;}
-Ball.prototype.update=function(){this.vy+=0.25;this.x+=this.vx;this.y+=this.vy;if(this.x<this.r||this.x>canvas.width-this.r){this.x=Math.max(this.r,Math.min(canvas.width-this.r,this.x));this.vx*=-0.9;}if(this.y>canvas.height-this.r){this.y=canvas.height-this.r;this.vy*=-0.85;}};
-Ball.prototype.draw=function(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle="hsl("+this.h+",70%,55%)";ctx.fill();};
-function tick(){ctx.clearRect(0,0,canvas.width,canvas.height);for(var i=0;i<balls.length;i++){balls[i].update();balls[i].draw();}requestAnimationFrame(tick);}
-function addBall(x,y){balls.push(new Ball(x,y));score++;var a=document.getElementById("scoreVal"),b=document.getElementById("scoreValEn");if(a)a.textContent=String(score);if(b)b.textContent=String(score);}
-canvas.addEventListener("click",function(e){var r=canvas.getBoundingClientRect();addBall(e.clientX-r.left,e.clientY-r.top);});
-canvas.addEventListener("touchstart",function(e){e.preventDefault();var t=e.touches[0],r=canvas.getBoundingClientRect();addBall(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-tick();
-})();
-</script>
+<body> <nav class="lang-switcher" aria-label="Language switcher"> <button type="button" id="btn-ar" class="active" aria-pressed="true">العربية</button> <button type="button" id="btn-en" aria-pressed="false">English</button> </nav> <div class="header"> <h1>Generative Art Experience</h1> </div> <section lang="ar" class="info-section active"> <h2>تجربة فنية مولدة تفاعلية</h2> <p>أهلا بك في تجربة فنية مولدة حيث يمكنك إنشاء لوحات فنية باستخدام أفعال بسيطة مثل النقر أو دسdrag، مما يؤدي إلى توليد أشكال وPatterns فريدة في الوقت الفعلي.</p> <p>استخدم الفأرة أو الأصابع (لأجهزة اللمس) للتفاعل مع القطن، وشاهد كيف يؤثر أفعالك على العمل الفني الناتج.</p> <p>انقر زر اللغة لتبديل بين العربية والإنجليزية.</p> </section> <section lang="en" class="info-section"> <h2>Interactive Generative Art Experience</h2> <p>Welcome to an interactive generative art experience where you can create unique artworks using simple actions like clicking or dragging, resulting in real-time generated shapes and patterns.</p> <p>Use your mouse or fingers (on touch devices) to interact with the canvas, and watch how your actions influence the final piece.</p> <p>Click the language button to switch between Arabic and English.</p> </section> <div class="content"> <canvas id="artCanvas"></canvas> </div> <script> const canvas = document.getElementById('artCanvas'); const ctx = canvas.getContext('2d'); let isDrawing = false; let currentColor = '#ffffff'; function setCanvasSize() { canvas.width = window.innerWidth * 0.95; canvas.height = window.innerHeight * 0.8; } window.addEventListener('resize', setCanvasSize); setCanvasSize(); ctx.fillStyle = currentColor; canvas.addEventListener('mousemove', draw); canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }); function startDrawing(e) { isDrawing = true; draw(e); } function draw(e) { if (!isDrawing) return; const rect = canvas.getBoundingClientRect(); const x = (e.clientX || e.touches[0].clientX) - rect.left; const y = (e.clientY || e.touches[0].clientY) - rect.top; const shapes = ['circle', 'square', 'triangle']; const shape = shapes[Math.floor(Math.random() * shapes.length)]; currentColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; ctx.fillStyle = currentColor; switch(shape) { case 'circle': ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); break; case 'square': ctx.fillRect(x - 15, y - 15, 30, 30); break; case 'triangle': ctx.beginPath(); ctx.moveTo(x, y - 30); ctx.lineTo(x + 15, y + 15); ctx.lineTo(x - 15, y + 15); ctx.closePath(); break; } ctx.fill(); } function stopDrawing() { isDrawing = false; } function setLanguage(lang) { document.documentElement.lang = lang; const arSection = document.querySelector('section[lang="ar"]'); const enSection = document.querySelector('section[lang="en"]'); if (lang === 'ar') { arSection.classList.add('active'); enSection.classList.remove('active'); } else { enSection.classList.add('active'); arSection.classList.remove('active'); } localStorage.setItem('language', lang); } document.getElementById('btn-ar').addEventListener('click', () => setLanguage('ar')); document.getElementById('btn-en').addEventListener('click', () => setLanguage('en')); // Initialize language const savedLang = localStorage.getItem('language') || 'ar'; setLanguage(savedLang); </script>
 </body>
 </html>
