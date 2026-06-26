@@ -18,6 +18,25 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const execAsync = promisify(exec);
 
+// #region agent log
+const DEBUG_ENDPOINT = "http://127.0.0.1:7443/ingest/7a93369d-f8c0-4d42-a118-0be9185cbe22";
+function debugLog(location, message, data, hypothesisId) {
+  fetch(DEBUG_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "7f0b2b" },
+    body: JSON.stringify({
+      sessionId: "7f0b2b",
+      location,
+      message,
+      data,
+      hypothesisId,
+      timestamp: Date.now(),
+      runId: process.env.DEBUG_RUN || "pre-fix",
+    }),
+  }).catch(() => {});
+}
+// #endregion
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, "public");
@@ -726,12 +745,31 @@ function validateBilingual(html) {
 }
 
 function validateAll(html, currentHTML) {
+  const quality = validateQuality(html, currentHTML);
+  const bilingual = validateBilingual(html);
+  const interactivity = validateInteractivity(html);
+  const syntax = validateScriptSyntax(html);
   const errors = [
-    ...validateQuality(html, currentHTML).errors,
-    ...validateBilingual(html).errors,
-    ...validateInteractivity(html).errors,
-    ...validateScriptSyntax(html).errors,
+    ...quality.errors,
+    ...bilingual.errors,
+    ...interactivity.errors,
+    ...syntax.errors,
   ];
+  // #region agent log
+  if (errors.length) {
+    const visible = extractVisibleText(html);
+    debugLog("agent.js:validateAll", "validation failed", {
+      quality: quality.errors,
+      bilingual: bilingual.errors,
+      interactivity: interactivity.errors,
+      syntax: syntax.errors,
+      htmlLen: html.length,
+      arabicChars: (visible.match(/[\u0600-\u06FF]/g) || []).length,
+      latinChars: (visible.match(/[a-zA-Z]/g) || []).length,
+      visibleSample: visible.slice(0, 120),
+    }, "A");
+  }
+  // #endregion
   return { valid: errors.length === 0, errors };
 }
 
@@ -744,17 +782,26 @@ async function mutateBody(newHTML) {
 }
 
 async function pushToNetwork() {
+  // #region agent log
+  debugLog("agent.js:pushToNetwork", "push attempt started", {}, "C");
+  // #endregion
   const commitMsg = `Evolution Step: ${new Date().toISOString()}`;
   await execAsync("git add public/", { cwd: ROOT });
   try {
     await execAsync(`git commit -m "${commitMsg}"`, { cwd: ROOT });
   } catch (err) {
     const stderr = err.stderr || err.message || "";
+    // #region agent log
+    debugLog("agent.js:pushToNetwork", "commit failed", { stderr: stderr.slice(0, 300) }, "C");
+    // #endregion
     if (stderr.includes("nothing to commit")) return false;
     throw new Error(`git commit failed: ${stderr}`);
   }
   await execAsync(`git push origin ${GIT_BRANCH}`, { cwd: ROOT });
   console.log(`[pushToNetwork] pushed to ${GIT_BRANCH}`);
+  // #region agent log
+  debugLog("agent.js:pushToNetwork", "push succeeded", { branch: GIT_BRANCH }, "C");
+  // #endregion
   return true;
 }
 
@@ -783,6 +830,9 @@ async function developPhase(currentHTML, state) {
           brainstormFailures++;
           retryHint = brainstormCheck.errors.join("; ");
           console.warn(`[developPhase] Brainstorm rejected: ${retryHint}`);
+          // #region agent log
+          debugLog("agent.js:developPhase", "brainstorm rejected", { errors: brainstormCheck.errors, attempt }, "E");
+          // #endregion
           await sleep(2000);
           continue;
         }
@@ -808,6 +858,9 @@ async function developPhase(currentHTML, state) {
       if (!planCheck.valid) {
         retryHint = planCheck.errors.join("; ");
         console.warn(`[developPhase] Plan rejected: ${retryHint}`);
+        // #region agent log
+        debugLog("agent.js:developPhase", "plan rejected", { errors: planCheck.errors, attempt }, "E");
+        // #endregion
         await sleep(2000);
         continue;
       }
@@ -825,18 +878,30 @@ async function developPhase(currentHTML, state) {
         check = validateAll(cleaned, currentHTML);
         if (check.valid) {
           console.log("[developPhase] Candidate passed all checks");
+          // #region agent log
+          debugLog("agent.js:developPhase", "develop succeeded", { attempt, htmlLen: cleaned.length }, "A");
+          // #endregion
           return { success: true, plan, brainstorm, html: cleaned };
         }
       }
 
       console.warn(`[developPhase] Build failed: ${check.errors.join("; ")}`);
+      // #region agent log
+      debugLog("agent.js:developPhase", "build rejected", { errors: check.errors, attempt }, "A");
+      // #endregion
       retryHint = check.errors.join("; ");
       await sleep(2000);
     } catch (err) {
       console.error(`[developPhase] Error: ${err.message}`);
+      // #region agent log
+      debugLog("agent.js:developPhase", "attempt error", { error: err.message, attempt }, "D");
+      // #endregion
       await sleep(2000);
     }
   }
+  // #region agent log
+  debugLog("agent.js:developPhase", "develop expired", { attempt }, "A");
+  // #endregion
   return { success: false, error: "Develop window expired without valid candidate" };
 }
 
@@ -887,6 +952,15 @@ async function runForever() {
         ? await verifyPhase(currentHTML, developResult)
         : { success: false, error: developResult.error };
       cycleDuration.verify = Date.now() - verifyStart;
+
+      // #region agent log
+      debugLog("agent.js:runForever", "cycle deploy result", {
+        developSuccess: developResult.success,
+        verifySuccess: verifyResult.success,
+        error: verifyResult.error || null,
+        verifyMs: cycleDuration.verify,
+      }, developResult.success ? "B" : "A");
+      // #endregion
 
       if (verifyResult.success) {
         await updateState(state, verifyResult.plan || developResult.plan,
