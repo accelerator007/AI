@@ -1,155 +1,161 @@
 {
-  "generation": 21,
+  "generation": 22,
   "theme": "cosmic",
-  "lastReflection": {
-    "lang": "ar",
-    "text": "الفن الرقمي هو تجربة حسية تجمع بين العقل والروح، مما ينفتححسين على عالم من الإبداع."
-  },
-  "lastPlan": "{\n  \"philosophy\": {\n    \"lang\": \"ar\",\n    \"text\": \"الفن الرقمي هو تجربة حسية تجمع بين العقل والروح، مما ينفتححسين على عالم من الإبداع.\"\n  },\n  \"philosophyEn\": {\n    \"lang\": \"en\",\n    \"text\": \"Digital art is a sensory experience that bridges the mind and spirit, opening users to a world of creativity and technology.\"\n  },\n  \"visualConcept\": {\n    \"lang\": \"ar,en\",\n    \"text\": \"تجربة بصرية مبتكرة تجمع بين الفن والتقنيات، حيث يمكن للمستخدمين التفاعل مع لوحات رقمية حية تتغير باختباراتهم. An innovative visual experience that combines art and technology, where users can interact with live digital paintings that change based on their inputs.\"\n  },\n  \"colorPalette\": [\n    \"#1a1a1a\",\n    \"#2196F3\",\n    \"#8A2BE2\"\n  ],\n  \"uiElements\": [\n    {\n      \"lang\": \"ar,en\",\n      \"text\": \"لمسة فنية / Artistic touch, تفاعل سمعي / Audio interaction\"\n    }\n  ],\n  \"interaction\": {\n    \"lang\": \"ar,en\",\n    \"text\": \"ال、Canvas。 Users can interact by touching/clicking on the canvas with mouse/touch to create audio effects and visualize their interactions.\"\n  },\n  \"typography\": [\n    \"Noto Sans Arabic\",\n    \"Orbitron\"\n  ],\n  \"evolutionGoal\": {\n    \"lang\": \"ar,en\",\n    \"text\": \"تحسين التجربة、。 Enhancing the user experience by adding more dynamic animations and interactive elements.\"\n  },\n  \"keepFromPrevious\": {\n    \"lang\": \"ar,en\",\n    \"text\": \"Canvas, Web Audio API, و أداة الرسمCanvasWebAPI。 Keeping the canvas, web audio API, and drawing tool as core elements.\"\n  },\n  \"newFeature\": {\n    \"lang\": \"ar,en\",\n    \"text\": \"أضفنا ميزة جديدة تتيح للمستخدمين تغيير القصة بناءً على أفعالهم. Added a new feature allowing users to change the story based on their actions.\"\n  }\n}",
-  "lastFailure": null,
+  "lastReflection": "الموسيقى هي لغة العواطف، و Ritmica ستعيد تفسير هذه اللغة من خلال تجربة رقمية مبتكرة. اللعبة ليست مجرد لعبة موسيقية، بل هي تجربة تفاعلية تعكس روح الإيقاع والفرح.",
+  "lastPlan": "{\n  \"philosophy\": \"الموسيقى هي لغة العواطف، و Ritmica ستعيد تفسير هذه اللغة من خلال تجربة رقمية مبتكرة. اللعبة ليست مجرد لعبة موسيقية، بل هي تجربة تفاعلية تعكس روح الإيقاع والفرح.\",\n  \"philosophyEn\": \"Music is the language of emotions, and Ritmica will reinterpret this language through an innovative digital experience. The game is not just a musical game, but an interactive experience that captures the spirit of rhythm and joy.\",\n  \"visualConcept\": \"لعبة موسيقية تفاعلية مع أنيميشن موسيقية مبهجة، واجهة بصرية متحركة مع إضاءة وicoloring تنساب مع الإيقاعات. Interactive music game with animated musical elements, a dynamic visual interface that flows with the rhythms and lighting.\",\n  \"colorPalette\": [\n    \"#FFA81C\",\n    \"#4ECDC4\",\n    \"#45B7D1\"\n  ],\n  \"uiElements\": [\n    \"أزرار تحكم موسيقية / Musical control buttons\",\n    \"مeters_tempo / Tempo meters\",\n    \"نماذج أنيميشن / Animation models\"\n  ],\n  \"interaction\": \"يتفاعل المستخدم مع الأنيميشن باستخدام أزرار متحركة على الشاشة، ويجب عليه مواكبة الإيقاع الموسيقي. The user interacts with the animation using moving buttons on the screen and must match the musical rhythm.\",\n  \"typography\": [\n    \"'Noto Sans Arabic', sans-serif\",\n    \"'Orbitron', sans-serif\"\n  ],\n  \"evolutionGoal\": \"تحسين تجربة التفاعلي من خلال إضافة موسيقى حية ونظام تقييم للتوقيت. Enhance musical interaction by adding live music and a timing evaluation system.\",\n  \"keepFromPrevious\": \"استخدام HTML5 Canvas و Web Audio API من الجيل السابق Keeping the use of HTML5 Canvas and Web Audio API from previous generations\",\n  \"newFeature\": \"إضافة نظام تقييم للتوقيت و أنيميشن موسيقية حية Adding a timing evaluation system and live musical animations\"\n}",
+  "lastFailure": "Develop window expired without valid candidate",
   "lastCycleDuration": {
-    "develop": 166360,
-    "verify": 5419,
+    "develop": 901507,
+    "verify": 1,
     "rest": 0
   },
   "creativeHistory": [
     {
       "generation": 2,
       "type": "mini-game",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API for pronunciation checks, and DOM manipulation for dynamic interactions.",
       "summary": "لعبة تفاعلية مخصصة للتعلمتفاعل حيث يحاول المستخدمون التغلب على تحديات في فضاء مع اجراء محادثات وحلproblems using Arabic and English."
     },
     {
       "generation": 3,
       "type": "simulation",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API for interactions, JavaScript for logic and AI libraries for character responses.",
       "summary": "محاكاة تفاعلية لتعلم اللغة العربية من خلال سيناريوهات مختلفة مع شخصيات افتراضية."
     },
     {
       "generation": 4,
       "type": "interactive-tool",
-      "feature": {
-        "ar": "سيستخدم HTML5 Canvas وWebGL ل، وWeb Audio API للتفاعل الصوتي.",
-        "en": "Will use HTML5 Canvas/WebGL for rendering images and Web Audio API for audio interaction."
-      },
-      "summary": {
-        "ar": "مختبر لغات مدمج مع الواقع المحيط (AR) يجمع بين التفاعل البصري والسماعي للتعليم.",
-        "en": "An Augmented Reality Language Lab that combines visual and auditory interaction for language learning."
-      }
+      "domain": "music",
+      "feature": "Will use HTML5 Canvas/WebGL for rendering images and Web Audio API for audio interaction.",
+      "summary": "An Augmented Reality Language Lab that combines visual and auditory interaction for language learning."
     },
     {
       "generation": 5,
       "type": "interactive-tool",
-      "feature": {
-        "lang": "en",
-        "text": "HTML5 Canvas for rendering, Web Audio API for interactions, JavaScript libraries for AR functionality, and device APIs to access the camera and motion sensors."
-      },
-      "summary": {
-        "lang": "ar",
-        "text": "أداة تفاعلية تعتمد على (AR) تتيح للمستخدمين استكشاف بيئات افتراضية مذهلة من خلال هواتفهم الذكية."
-      }
+      "domain": "music",
+      "feature": "HTML5 Canvas for rendering, Web Audio API for interactions, JavaScript libraries for AR functionality, and device APIs to access the camera and motion sensors.",
+      "summary": "أداة تفاعلية تعتمد على (AR) تتيح للمستخدمين استكشاف بيئات افتراضية مذهلة من خلال هواتفهم الذكية."
     },
     {
       "generation": 6,
       "type": "interactive-tool",
-      "feature": "سيتم استخدام Web Audio API لتحليل الصوت وتقنيات HTML5 Canvas للแสดง المخرجات بشكل مرئي use Web Audio API for voice analysis and HTML5 Canvas to display outputs visually.",
+      "domain": "music",
+      "feature": "سيتم استخدام Web Audio API لتحليل الصوت وتقنيات HTML5 Canvas لل المخرجات بشكل مرئي use Web Audio API for voice analysis and HTML5 Canvas to display outputs visually.",
       "summary": "أداة تفاعلية لتمارين التحدث العامة حيث يمكن للمستخدمون تسجيل محاضراتهم وتحليل نبرة صوتهم ومدتها العربية Interactive tool for public speaking practice where users can record speeches and analyze voice pitch and duration in English."
     },
     {
       "generation": 7,
       "type": "interactive-tool",
-      "feature": "HTML5 Canvas para la visualización del juego, Web Audio API para los efectos sonoros y JavaScript para el control del juego.",
+      "domain": "music",
+      "feature": "HTML5 Canvas la visualización del juego, Web Audio API los efectos sonoros y JavaScript el control del juego.",
       "summary": "الكرة الطائرة الروبوتية: لعبة تفاعلية حيث يتنافس المستخدمون مع روبوتات ذكية في ملعب افتراضي. تتضمن اللعبة تحكمًا دقيقًا وgraphics بديهية."
     },
     {
       "generation": 8,
       "type": "interactive-tool",
-      "feature": "HTML5 Canvas para la visualización, Web Audio API para el análisis y generación de audio, y JavaScript para el control lógico.",
+      "domain": "music",
+      "feature": "HTML5 Canvas la visualización, Web Audio API el análisis y generación de audio, y JavaScript el control lógico.",
       "summary": "لعبة تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى باستخدام أصواتهم وتحويلها إلى رسوم بيانية في HTML5 Canvas، مع استخدام Web Audio API لإضافة_fx وأدوات التحكم بالموسيقى."
     },
     {
       "generation": 9,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas la visualisation en temps réel des notes musicales et Web Audio API l'analyse et la génération audio.",
       "summary": "أداة تفاعلية لإنشاء موسيقى من خلال ال - Interactive tool to create music using voice."
     },
     {
       "generation": 10,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas للرسوم المتحركة، وWeb Audio API للتحليل وال الموسيقى، وJavaScript لل CONTROL THE LOGIC.",
       "summary": "لعبة موسيقية تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى باستخدام أصواتهم.ottle/Interactive-Music-Generation-Game"
     },
     {
       "generation": 11,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas for particle visualization and Web Audio API for sound generation.",
       "summary": "لعبة تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى بتحريك جزيئات في الفضاء، مما يجعلهم ي EXPERIMENT WITH SOUND AND VISUALS."
     },
     {
       "generation": 12,
       "type": "interactive-tool",
+      "domain": "word/typing-game",
       "feature": "HTML5 Canvas",
       "summary": "قمر عالمي للالتحامات السرية - Secret Affair World Maker. Create and explore secret relationships between characters in a story using interactive visualizations and soundscapes."
     },
     {
       "generation": 13,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API",
-      "summary": "أداة تفاعلية حيث يمكن للمستخدمين إنشاء أشكال بصرية و Sounds في الوقت الفعلي، باستخدام HTML5 Canvas للرسوم المتحركة و Web Audio API للصوت. يمكن للم'utilisateur تخصيص المظهر والصوت حسب رغباتهم."
+      "summary": "أداة تفاعلية حيث يمكن للمستخدمين إنشاء أشكال بصرية و Sounds في الوقت الفعلي، باستخدام HTML5 Canvas للرسوم المتحركة و Web Audio API للصوت. يمكن للم' تخصيص المظهر والصوت حسب رغباتهم."
     },
     {
       "generation": 14,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas for visual elements and Web Audio API for sound generation",
-      "summary": "فرصة للاعبين لإنشاء موسيقى باستخدام عنصرات مرئية، يمكنهم ترتيبها وتحريكها لcrear نغمات موسيقية فريدة. Interactive tool allowing players to create music using visual elements, which they can arrange and move to create unique musical notes."
+      "summary": "فرصة للاعبين لإنشاء موسيقى باستخدام عنصرات مرئية، يمكنهم ترتيبها وتحريكها ل نغمات موسيقية فريدة. Interactive tool allowing players to create music using visual elements, which they can arrange and move to create unique musical notes."
     },
     {
       "generation": 15,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API",
       "summary": "أداة تفاعلية موسيقية حيث يمكن للمستخدمين إنشاء موسيقى ب ورؤية التمثيلات المرئية في الوقت الحقيقي. تشمل الميزة إمكانية حفظ الإنشاءات ومشاركة الصور."
     },
     {
       "generation": 16,
       "type": "interactive-tool",
-      "feature": {
-        "ar": "abinar ستعتمد على HTML5 Canvas و Web Audio API لتقديم تجربة مượtة وتفاعلية.",
-        "en": "abinar will rely on HTML5 Canvas and Web Audio API to deliver a smooth and interactive experience."
-      },
-      "summary": {
-        "ar": "فكرة مبتكرة تجمع بين التفاعلية والترفيه: 'abinar'، أداة تفاعلية يمكنهم من خلالها إنشاء وMixing موسيقى وEffects في เวقت.",
-        "en": "An innovative interactive idea combining entertainment and creativity: 'abinar,' an interactive tool allowing users to create and mix music and effects in real-time."
-      }
+      "domain": "music",
+      "feature": "abinar will rely on HTML5 Canvas and Web Audio API to deliver a smooth and interactive experience.",
+      "summary": "An innovative interactive idea combining entertainment and creativity: 'abinar,' an interactive tool allowing users to create and mix music and effects in real-time."
     },
     {
       "generation": 17,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "Canvas, Web Audio API",
       "summary": "ق suspicious م_creator واقع في بيئة رقمية حيث يمكن للمستخدمين إنشاء موسيقى عن طريق الرسم على قماشة رقمية. كل خط أو شكل ي.DrawLine.Canvas يCreate نتاجًا صوتيًا فريدًا."
     },
     {
       "generation": 18,
       "type": "interactive-tool",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API, Mouse/Touch interactions",
       "summary": "لعبة تفاعلية تجمع بين الرسم والموسيقى حيث يمكن للمستخدم إنشاء موسيقاه باستخدام أداة رسم على الكانفس، وتحويل إلى نغمات موسيقية مماثلة."
     },
     {
       "generation": 19,
       "type": "mini-game",
+      "domain": "music",
       "feature": "HTML5 Canvas, Web Audio API, Mouse/Touch interactions",
       "summary": "لعبة موسيقية تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى باستخدام أداة رسم وتفاعل سمعي، ورؤية التأثيرات السمعية والمرئية في الوقت الحقيقي."
     },
     {
       "generation": 20,
       "type": "visual-experience",
+      "domain": "music",
       "feature": "Canvas, Web Audio API, JavaScript",
-      "summary": "تجربة بصرية قابلة للتعديل حيث يقوم المستخدم باختيار العناصر التي ت القصة، مما يجعله جزءًا من الحبكة. تستخدم تقنيات HTML5 Canvas و Web Audio API لإنشاء عالم رقمي متفاعل مع أصوات وأحداث تتغير بناءً على قرارات המשתמש."
+      "summary": "تجربة بصرية قابلة للتعديل حيث يقوم المستخدم باختيار العناصر التي ت القصة، مما يجعله جزءًا من الحبكة. تستخدم تقنيات HTML5 Canvas و Web Audio API لإنشاء عالم رقمي متفاعل مع أصوات وأحداث تتغير بناءً على قرارات ."
     },
     {
       "generation": 21,
       "type": "visual-experience",
+      "domain": "music",
       "feature": "Canvas, Web Audio API, Mouse/Touch interactions",
       "summary": "تجربة بصرية مبتكرة تجمع بين الفن وال Tecno، حيث يمكن للمستخدمين التفاعل مع لوحات رقمية حية تتغير باختباراتهم."
+    },
+    {
+      "generation": 22,
+      "type": "mini-game",
+      "domain": "music",
+      "feature": "HTML5 Canvas, Web Audio API, Mouse/Touch interactions, Game Loop",
+      "summary": "لعبة Ritmica: لعبة موسيقية تفاعلية حيث يلعب المستخدم مع أنيميشن موسيقية، واجهة بصرية تتفاعل مع موسيقى خفيفة. المهمة هي إبقاء التوقيت مع الأغنية باستخدام أزرار متحركة."
     }
   ],
   "usedCreativeTypes": [
@@ -158,8 +164,38 @@
     "interactive-tool",
     "visual-experience"
   ],
-  "improvementGoal": {
-    "lang": "ar,en",
-    "text": "تحسين التجربة、。 Enhancing the user experience by adding more dynamic animations and interactive elements."
-  }
+  "usedDomains": [
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "word/typing-game",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music",
+    "music"
+  ],
+  "recentIdeas": [
+    "أداة تفاعلية موسيقية حيث يمكن للمستخدمين إنشاء موسيقى ب ورؤية التمثيلات المرئية في الوقت الحقيقي. تشمل الميزة إمكانية حفظ الإنشاءات ومشاركة الصور.",
+    "An innovative interactive idea combining entertainment and creativity: 'abinar,' an interactive tool allowing users to create and mix music and effects in real-time.",
+    "ق suspicious م_creator واقع في بيئة رقمية حيث يمكن للمستخدمين إنشاء موسيقى عن طريق الرسم على قماشة رقمية. كل خط أو شكل ي.DrawLine.Canvas يCreate نتاجًا صوتيًا فريدًا.",
+    "لعبة تفاعلية تجمع بين الرسم والموسيقى حيث يمكن للمستخدم إنشاء موسيقاه باستخدام أداة رسم على الكانفس، وتحويل إلى نغمات موسيقية مماثلة.",
+    "لعبة موسيقية تفاعلية حيث يمكن للمستخدمين إنشاء موسيقى باستخدام أداة رسم وتفاعل سمعي، ورؤية التأثيرات السمعية والمرئية في الوقت الحقيقي.",
+    "تجربة بصرية قابلة للتعديل حيث يقوم المستخدم باختيار العناصر التي ت القصة، مما يجعله جزءًا من الحبكة. تستخدم تقنيات HTML5 Canvas و Web Audio API لإنشاء عالم رقمي متفاعل مع أصوات وأحداث تتغير بناءً على قرارات .",
+    "تجربة بصرية مبتكرة تجمع بين الفن وال Tecno، حيث يمكن للمستخدمين التفاعل مع لوحات رقمية حية تتغير باختباراتهم.",
+    "لعبة Ritmica: لعبة موسيقية تفاعلية حيث يلعب المستخدم مع أنيميشن موسيقية، واجهة بصرية تتفاعل مع موسيقى خفيفة. المهمة هي إبقاء التوقيت مع الأغنية باستخدام أزرار متحركة."
+  ],
+  "improvementGoal": "تحسين تجربة التفاعلي من خلال إضافة موسيقى حية ونظام تقييم للتوقيت. Enhance musical interaction by adding live music and a timing evaluation system."
 }
